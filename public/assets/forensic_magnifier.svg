@@ -1,0 +1,28 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Grid Background -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#00FF8C" stroke-width="0.5" stroke-opacity="0.2"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="400" fill="url(#grid)" />
+
+  <!-- Stylized Target -->
+  <circle cx="200" cy="200" r="80" stroke="#00FF8C" stroke-width="2" stroke-dasharray="10 5" />
+  <circle cx="200" cy="200" r="40" stroke="#00FF8C" stroke-width="1" />
+  <line x1="200" y1="100" x2="200" y2="300" stroke="#00FF8C" stroke-width="1" stroke-opacity="0.5" />
+  <line x1="100" y1="200" x2="300" y2="200" stroke="#00FF8C" stroke-width="1" stroke-opacity="0.5" />
+  
+  <!-- Crosshair center -->
+  <path d="M 190 200 L 210 200 M 200 190 L 200 210" stroke="#00FF8C" stroke-width="2" />
+
+  <!-- Magnifying Glass -->
+  <g transform="translate(240, 240) rotate(45)">
+    <!-- Lens Frame -->
+    <circle cx="0" cy="0" r="50" stroke="#00FF8C" stroke-width="4" fill="rgba(0, 255, 140, 0.05)" />
+    <!-- Handle -->
+    <rect x="-5" y="50" width="10" height="60" fill="#00FF8C" rx="2" />
+    <!-- Lens Highlight -->
+    <path d="M -25 -25 A 35 35 0 0 1 10 -35" stroke="#00FF8C" stroke-width="2" stroke-linecap="round" stroke-opacity="0.6" />
+  </g>
+</svg>

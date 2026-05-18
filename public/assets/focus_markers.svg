@@ -1,0 +1,13 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Top Left -->
+  <path d="M 20 50 L 20 20 L 50 20" stroke="#00FF8C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Top Right -->
+  <path d="M 150 20 L 180 20 L 180 50" stroke="#00FF8C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Bottom Left -->
+  <path d="M 20 150 L 20 180 L 50 180" stroke="#00FF8C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Bottom Right -->
+  <path d="M 150 180 L 180 180 L 180 150" stroke="#00FF8C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

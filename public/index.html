@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkyourphoto - Futuristic Forensic Analysis</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts: Orbitron, Silkscreen & Big Shoulders Display -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Silkscreen&family=Big+Shoulders+Display:wght@900&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        :root {
+            --bg-color: #101314;
+            --card-bg: #141C1A;
+            --accent-color: #00FF8C;
+            --text-color: #e0e0e0;
+            --border-glow: 0 0 10px rgba(0, 255, 140, 0.3);
+            --neon-text-glow: 0 0 5px rgba(0, 255, 140, 0.7);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Orbitron', sans-serif;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(0, 255, 140, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 140, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .brand-font {
+            font-family: 'Big Shoulders Display', sans-serif;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .pixel-font {
+            font-family: 'Silkscreen', cursive;
+        }
+
+        .neon-text {
+            color: var(--accent-color);
+            text-shadow: var(--neon-text-glow);
+        }
+
+        .navbar {
+            background-color: rgba(16, 19, 20, 0.9);
+            border-bottom: 1px solid rgba(0, 255, 140, 0.2);
+            padding: 1rem 0;
+        }
+
+        .brand-icon {
+            width: 30px;
+            height: 30px;
+            margin: 0 10px;
+            filter: drop-shadow(var(--neon-text-glow));
+        }
+
+        .header-title {
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .header-subtitle {
+            font-size: 1.2rem;
+            letter-spacing: 8px;
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: 3rem;
+            opacity: 0.8;
+        }
+
+        .scan-container {
+            border: none;
+            background: transparent;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .focus-marker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            filter: drop-shadow(var(--neon-text-glow));
+            opacity: 1;
+            pointer-events: none;
+            object-fit: fill;
+        }
+
+        /* Scanline Effect Overlay */
+        .scan-container::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(0, 255, 140, 0.02), rgba(0, 255, 140, 0.01), rgba(0, 255, 140, 0.02));
+            z-index: 2;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .dropzone {
+            border: none !important;
+            background-color: transparent !important;
+            padding: 60px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Scanning Laser Line */
+        .scan-line {
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--accent-color), transparent);
+            box-shadow: 0 0 15px var(--accent-color);
+            z-index: 10;
+            animation: scan 4s linear infinite;
+            display: none;
+        }
+
+        .scan-container:hover .scan-line {
+            display: block;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        .scan-container:hover {
+            background-color: rgba(0, 255, 140, 0.02);
+        }
+
+        .dropzone.dragover {
+            background-color: rgba(0, 255, 140, 0.05) !important;
+        }
+
+        .upload-icon {
+            width: 120px;
+            margin-bottom: 20px;
+            filter: drop-shadow(var(--neon-text-glow));
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(0, 255, 140, 0.2);
+            border-radius: 4px;
+            color: var(--text-color);
+        }
+
+        .card-header {
+            background-color: rgba(0, 255, 140, 0.1);
+            border-bottom: 1px solid rgba(0, 255, 140, 0.2);
+            font-family: 'Silkscreen', sans-serif;
+            color: var(--accent-color);
+        }
+
+        .nav-tabs {
+            border-bottom: 1px solid rgba(0, 255, 140, 0.2);
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            border: none;
+            opacity: 0.6;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-color);
+            opacity: 1;
+        }
+
+        .nav-link.active {
+            background-color: transparent !important;
+            color: var(--accent-color) !important;
+            border-bottom: 2px solid var(--accent-color) !important;
+            opacity: 1;
+            text-shadow: var(--neon-text-glow);
+        }
+
+        .form-control, .form-control:focus {
+            background-color: #0d1110;
+            border: 1px solid rgba(0, 255, 140, 0.3);
+            color: var(--text-color);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            border: none;
+            color: var(--bg-color);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            background-color: #00cc7a;
+            box-shadow: var(--border-glow);
+        }
+
+        .btn-outline-secondary {
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            border: 1px solid rgba(0, 255, 140, 0.2);
+            filter: grayscale(1) invert(0.9) hue-rotate(100deg);
+        }
+
+        .timeline-item {
+            padding: 15px;
+            border-left: 2px solid var(--accent-color);
+            margin-left: 20px;
+            position: relative;
+            background-color: rgba(0, 255, 140, 0.02);
+            margin-bottom: 10px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--accent-color);
+            box-shadow: var(--neon-text-glow);
+            border-radius: 50%;
+            left: -6px;
+            top: 20px;
+        }
+
+        .table {
+            color: var(--text-color);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 255, 140, 0.05);
+            color: var(--accent-color);
+        }
+
+        code {
+            color: #ffcc00;
+        }
+
+        #results {
+            display: none;
+        }
+
+        .interpretation-field {
+            font-family: sans-serif;
+            font-size: 0.9rem;
+        }
+
+        /* Modal Forensic Theme */
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--accent-color);
+            box-shadow: var(--border-glow);
+            color: var(--text-color);
+        }
+        .modal-header {
+            border-bottom: 1px solid rgba(0, 255, 140, 0.2);
+            font-family: 'Silkscreen', sans-serif;
+        }
+        .modal-footer {
+            border-top: 1px solid rgba(0, 255, 140, 0.2);
+        }
+        .modal-title {
+            color: var(--accent-color);
+            text-shadow: var(--neon-text-glow);
+        }
+
+        /* Tooltip Customization */
+        .tooltip-inner {
+            background-color: var(--card-bg) !important;
+            border: 1px solid var(--accent-color) !important;
+            color: var(--accent-color) !important;
+            font-family: sans-serif !important;
+            font-size: 0.8rem !important;
+            box-shadow: var(--border-glow) !important;
+            padding: 10px !important;
+            max-width: 250px !important;
+        }
+        .tooltip .tooltip-arrow::before {
+            border-top-color: var(--accent-color) !important;
+        }
+
+        .lead-banner {
+            border-top: 1px solid var(--accent-color);
+            border-bottom: 1px solid var(--accent-color);
+            background-color: #0d1110;
+        }
+
+        @media print {
+            .btn, .dropzone, .nav-tabs, .card-header i, #loading, #rawSearch, .copy-btn, .form-check, .alert-warning, .lead-banner, footer .lead-form-container, .navbar {
+                display: none !important;
+            }
+            body { background-color: white !important; color: black !important; font-family: sans-serif !important; }
+            .card { border: 1px solid #ccc !important; background-color: white !important; color: black !important; }
+            .card-header { background-color: #f8f9fa !important; color: black !important; border-bottom: 1px solid #ccc !important; }
+            #map { filter: none !important; height: 400px !important; border: 1px solid #ccc !important; }
+            .neon-text { color: black !important; text-shadow: none !important; }
+            .scan-container { border: none !important; background: none !important; padding: 0 !important; }
+            .scan-container::before { display: none !important; }
+            .tab-content > .tab-pane { display: block !important; opacity: 1 !important; }
+            .header-title { font-size: 2rem; margin-top: 0; }
+            .header-subtitle { letter-spacing: 2px; margin-bottom: 1rem; }
+            .form-control { background-color: white !important; color: black !important; border: 1px solid #ccc !important; }
+            .input-group-text, .btn-outline-secondary { display: none !important; }
+            .input-group > .form-control { border-radius: 4px !important; }
+            .table-responsive { max-height: none !important; overflow: visible !important; }
+            .tab-pane { page-break-inside: avoid; margin-bottom: 20px; }
+        }
+        #forensicLibraryModal .nav-link {
+            color: #888;
+            border: 1px solid transparent;
+            border-radius: 2px;
+            transition: all 0.2s;
+            background: transparent;
+        }
+        #forensicLibraryModal .nav-link.active {
+            background-color: rgba(0, 255, 140, 0.1) !important;
+            color: var(--accent-color) !important;
+            border: 1px solid var(--accent-color) !important;
+            box-shadow: 0 0 5px rgba(0, 255, 140, 0.2);
+        }
+        #forensicLibraryModal .nav-link:hover:not(.active) {
+            color: #ccc;
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        /* Anomaly Matrix Styles */
+        .anomaly-badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 2px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .severity-high { background-color: rgba(255, 0, 0, 0.2); color: #ff4d4d; border: 1px solid #ff4d4d; }
+        .severity-medium { background-color: rgba(255, 165, 0, 0.2); color: #ffa500; border: 1px solid #ffa500; }
+        .severity-low { background-color: rgba(0, 255, 140, 0.1); color: var(--accent-color); border: 1px solid var(--accent-color); }
+        
+        .anomaly-item {
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .anomaly-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .anomaly-item.high { border-left-color: #ff4d4d; }
+        .anomaly-item.medium { border-left-color: #ffa500; }
+        .anomaly-item.low { border-left-color: var(--accent-color); }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container justify-content-center">
+        <img src="assets/telescope_icon.svg" class="brand-icon" alt="Scan">
+        <span class="navbar-brand neon-text pixel-font">META_READER_v1.0 <span id="proBadge" class="badge bg-primary text-dark ms-2 d-none" style="font-size: 0.5rem; vertical-align: middle;">PRO_FORENSICS</span></span>
+        <img src="assets/microscope_icon.svg" class="brand-icon" alt="Analysis">
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h1 class="header-title neon-text brand-font">CHECK YOUR PHOTO</h1>
+    <p class="header-subtitle pixel-font">FORENSIC ANALYSIS</p>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+                <div class="scan-container mb-5">
+                    <img src="assets/focus_markers.svg" class="focus-marker" alt="Scanning Focus">
+                    <div class="scan-line"></div>
+                    <div class="dropzone" id="uploadArea">
+                        <img src="assets/forensic_magnifier.svg" class="upload-icon" alt="Upload">
+                        <h4 class="pixel-font neon-text">INITIATE SCAN</h4>
+                        <p class="mt-2 text-muted small">DRAG PHOTO OR DOCUMENT HERE / CLICK TO BROWSE</p>
+                        <input type="file" id="fileInput" class="d-none" accept="image/*,application/pdf">
+                    </div>
+                </div>
+                
+                <div id="loading" class="text-center mt-4" style="display: none;">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 neon-text pixel-font">EXTRACTING METADATA... DECRYPTING HEADERS...</p>
+                </div>
+                </div>
+
+                <div id="results" class="mt-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-2">
+                        <h5 id="fileNameDisplay" class="neon-text pixel-font mb-0">TARGET_FILE.DAT</h5>
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-primary me-2" id="emailReportBtn" data-bs-toggle="modal" data-bs-target="#emailModal"><i class="bi bi-envelope"></i> EMAIL REPORT <span class="badge bg-dark text-primary ms-1" style="font-size: 0.6rem;">PRO</span></button>
+                            <button class="btn btn-sm btn-outline-secondary me-2" id="exportJson"><i class="bi bi-filetype-json"></i> JSON</button>
+                            <button class="btn btn-sm btn-primary" id="downloadPdf"><i class="bi bi-file-earmark-pdf"></i> DOWNLOAD REPORT <span class="badge bg-dark text-primary ms-1" style="font-size: 0.6rem;">PRO</span></button>
+                        </div>
+                    </div>
+
+                    <h6 class="pixel-font mb-3">SCAN / METADATA INFORMATION</h6>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs mb-4" id="metaTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab">OVERVIEW</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="raw-tab" data-bs-toggle="tab" data-bs-target="#raw" type="button" role="tab">RAW_EXIF</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="gps-tab" data-bs-toggle="tab" data-bs-target="#gps" type="button" role="tab">GEOLOCATION</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline" type="button" role="tab">TIMELINE</button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content bg-transparent" id="metaTabsContent">
+                        <!-- Summary Tab -->
+                        <div class="tab-pane fade show active" id="summary" role="tabpanel">
+                            <div class="card mb-4" style="border: 1px solid var(--accent-color); background: rgba(0, 255, 140, 0.05);">
+                                <div class="card-body p-3 text-center">
+                                    <label class="form-label small text-uppercase fw-bold text-primary mb-1" data-bs-toggle="tooltip" title="Final forensic determination based on hardware signatures, software markers, and AI generation tags.">PRIMARY_FORENSIC_STATUS <i class="bi bi-info-circle"></i> <a href="#" class="ms-1 neon-text text-decoration-none" data-bs-toggle="modal" data-bs-target="#forensicLibraryModal" style="font-size: 0.65rem;">[LEARN_MORE]</a></label>
+                                    <h4 id="val-forensic-status" class="pixel-font neon-text mb-0">ANALYZING...</h4>
+                                </div>
+                            </div>
+
+                            <!-- Anomaly Matrix Section -->
+                            <div class="card mb-4 bg-dark border-secondary" id="anomalySection" style="display: none;">
+                                <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background: rgba(255, 77, 77, 0.05);">
+                                    <h6 class="pixel-font mb-0 small text-uppercase fw-bold text-danger"><i class="bi bi-exclamation-triangle"></i> ANOMALY_MATRIX <span class="badge bg-danger text-white ms-2" style="font-size: 0.6rem;">PRO</span></h6>
+                                    <span class="badge severity-high" id="anomalyCount">0 FLAGS</span>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div id="anomalyList" class="list-group list-group-flush bg-transparent">
+                                        <!-- Anomalies will be injected here -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" id="summaryContent">
+                                <div class="col-md-6 mb-3">
+                                    <div class="card mb-3">
+                                        <div class="card-body p-3">
+                                            <label class="form-label small text-uppercase fw-bold text-muted mb-1" data-bs-toggle="tooltip" title="Embedded time when the media was originally captured. Discrepancies with file dates suggest editing.">Capture Timestamp <i class="bi bi-info-circle" style="font-size: 0.7rem;"></i> <a href="#" class="ms-1 neon-text text-decoration-none" data-bs-toggle="modal" data-bs-target="#forensicLibraryModal" style="font-size: 0.6rem;">[INFO]</a></label>
+                                            <div class="input-group mb-2 shadow-sm">
+                                                <span class="form-control" id="val-capture-time">N/A</span>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="copyText('val-capture-time')"><i class="bi bi-clipboard"></i></button>
+                                            </div>
+                                            <label class="form-label small text-uppercase fw-bold text-primary mb-1">Agent Interpretation</label>
+                                            <input type="text" id="interp-capture-time" class="form-control form-control-sm interpretation-field" placeholder="Notes...">
+                                        </div>
+                                    </div>
+
+                                    <div class="card mb-3">
+                                        <div class="card-body p-3">
+                                            <label class="form-label small text-uppercase fw-bold text-muted mb-1" data-bs-toggle="tooltip" title="Camera make and model. Missing or generic IDs often indicate digital synthesis or social media processing.">Hardware ID <i class="bi bi-info-circle" style="font-size: 0.7rem;"></i> <a href="#" class="ms-1 neon-text text-decoration-none" data-bs-toggle="modal" data-bs-target="#forensicLibraryModal" style="font-size: 0.6rem;">[INFO]</a></label>
+                                            <div class="input-group mb-2 shadow-sm">
+                                                <span class="form-control" id="val-device">N/A</span>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="copyText('val-device')"><i class="bi bi-clipboard"></i></button>
+                                            </div>
+                                            <label class="form-label small text-uppercase fw-bold text-primary mb-1">Agent Interpretation</label>
+                                            <input type="text" id="interp-device" class="form-control form-control-sm interpretation-field" placeholder="Notes...">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="card mb-3">
+                                        <div class="card-body p-3">
+                                            <label class="form-label small text-uppercase fw-bold text-muted mb-1" data-bs-toggle="tooltip" title="GPS location of capture. Absence is common in files from messaging apps or privacy-conscious exports.">Origin Coordinates <i class="bi bi-info-circle" style="font-size: 0.7rem;"></i> <a href="#" class="ms-1 neon-text text-decoration-none" data-bs-toggle="modal" data-bs-target="#forensicLibraryModal" style="font-size: 0.6rem;">[INFO]</a></label>
+                                            <div class="input-group mb-2 shadow-sm">
+                                                <span class="form-control" id="val-location">N/A</span>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="copyText('val-location')"><i class="bi bi-clipboard"></i></button>
+                                            </div>
+                                            <label class="form-label small text-uppercase fw-bold text-primary mb-1">Agent Interpretation</label>
+                                            <input type="text" id="interp-location" class="form-control form-control-sm interpretation-field" placeholder="Notes...">
+                                        </div>
+                                    </div>
+
+                                    <div class="card mb-3">
+                                        <div class="card-body p-3">
+                                            <label class="form-label small text-uppercase fw-bold text-muted mb-1" data-bs-toggle="tooltip" title="Last application used to save the file. Forensic indicator of potential post-processing (e.g., Photoshop).">Last Software Save <i class="bi bi-info-circle" style="font-size: 0.7rem;"></i> <a href="#" class="ms-1 neon-text text-decoration-none" data-bs-toggle="modal" data-bs-target="#forensicLibraryModal" style="font-size: 0.6rem;">[INFO]</a></label>
+                                            <div class="input-group mb-2 shadow-sm">
+                                                <span class="form-control" id="val-software">N/A</span>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="copyText('val-software')"><i class="bi bi-clipboard"></i></button>
+                                            </div>
+                                            <label class="form-label small text-uppercase fw-bold text-primary mb-1">Agent Interpretation</label>
+                                            <input type="text" id="interp-software" class="form-control form-control-sm interpretation-field" placeholder="Notes...">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- File Integrity Section -->
+                            <div class="card mb-4 bg-dark border-secondary">
+                                <div class="card-header py-2" style="background: rgba(255,255,255,0.05);">
+                                    <h6 class="pixel-font mb-0 small text-uppercase fw-bold text-muted"><i class="bi bi-shield-lock"></i> FILE_INTEGRITY_MANIFEST</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="row">
+                                        <div class="col-md-4 mb-2">
+                                            <label class="form-label small text-uppercase fw-bold text-muted mb-1" data-bs-toggle="tooltip" title="Unique forensic identifier for this scan session.">Report ID <i class="bi bi-info-circle" style="font-size: 0.7rem;"></i></label>
+                                            <div class="input-group input-group-sm shadow-sm">
+                                                <span class="form-control bg-transparent text-white border-secondary" id="val-report-id">N/A</span>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="copyText('val-report-id')"><i class="bi bi-clipboard"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <label class="form-label small text-uppercase fw-bold text-muted mb-1" data-bs-toggle="tooltip" title="MD5 cryptographic hash of the analyzed file.">MD5 Fingerprint <i class="bi bi-info-circle" style="font-size: 0.7rem;"></i></label>
+                                            <div class="input-group input-group-sm shadow-sm">
+                                                <span class="form-control bg-transparent text-white border-secondary text-truncate" id="val-md5" style="font-size: 0.65rem;">N/A</span>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="copyText('val-md5')"><i class="bi bi-clipboard"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <label class="form-label small text-uppercase fw-bold text-muted mb-1" data-bs-toggle="tooltip" title="SHA-256 cryptographic hash. Industry standard for file verification.">SHA-256 Hash <i class="bi bi-info-circle" style="font-size: 0.7rem;"></i></label>
+                                            <div class="input-group input-group-sm shadow-sm">
+                                                <span class="form-control bg-transparent text-white border-secondary text-truncate" id="val-sha256" style="font-size: 0.65rem;">N/A</span>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="copyText('val-sha256')"><i class="bi bi-clipboard"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Raw EXIF Tab -->
+                        <div class="tab-pane fade" id="raw" role="tabpanel">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="rawSearch" placeholder="FILTER_TAGS...">
+                            </div>
+                            <div class="table-responsive" style="max-height: 500px;">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>TAG_ID</th>
+                                            <th>DATA_VALUE</th>
+                                            <th style="width: 40px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="rawExifBody">
+                                        <!-- To be populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- GPS Map Tab -->
+                        <div class="tab-pane fade" id="gps" role="tabpanel">
+                            <div id="noGpsMessage" class="alert alert-dark text-center" style="display: none; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2);">
+                                <i class="bi bi-exclamation-triangle neon-text"></i> NO GEOLOCATION DATA DETECTED
+                            </div>
+                            <div id="map"></div>
+                        </div>
+                        <!-- Timeline Tab -->
+                        <div class="tab-pane fade" id="timeline" role="tabpanel">
+                            <div id="timelineContainer">
+                                <!-- To be populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI explanation card -->
+                    <div class="card mt-4 shadow-lg" style="border-left: 4px solid var(--accent-color);">
+                        <div class="card-body">
+                            <h6 class="pixel-font neon-text mb-3"><i class="bi bi-cpu"></i> AI_FORENSIC_SUMMARY</h6>
+                            <div id="aiExplanation" class="small" style="line-height: 1.6; color: #bbb;">
+                                <!-- To be populated by JS -->
+                            </div>
+                            <hr style="border-color: rgba(0, 255, 140, 0.2);">
+                            <div class="alert alert-dark py-2 mb-0 small" style="background: rgba(0,0,0,0.3);">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="disclaimer">
+                                    <label class="form-check-label text-muted" for="disclaimer">
+                                        <strong class="text-warning">DISCLAIMER:</strong> Metadata parameters can be manipulated. Data values provided for investigative hypotheses only.
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ / Forensic Knowledge Base -->
+                <div class="row mt-5">
+                    <div class="col-lg-12">
+                        <div class="card bg-dark border-secondary">
+                            <div class="card-header pixel-font d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-book"></i> FORENSIC_KNOWLEDGE_BASE</span>
+                                <button class="btn btn-link btn-sm neon-text text-decoration-none p-0" data-bs-toggle="modal" data-bs-target="#forensicLibraryModal" style="font-size: 0.7rem;">[ OPEN_LIBRARY ]</button>
+                            </div>
+                            <div class="card-body small">
+                                <div class="row">
+                                    <div class="col-md-3 mb-3 border-end border-secondary">
+                                        <h6 class="neon-text small fw-bold">FORENSIC STATUS LABELS</h6>
+                                        <ul class="list-unstyled text-muted mb-0" style="font-size: 0.8rem;">
+                                            <li><strong class="text-white">AI Signature Detected:</strong> Found markers uniquely associated with Generative AI tools.</li>
+                                            <li><strong class="text-white">Camera Captured:</strong> Metadata matches raw hardware output from known manufacturers.</li>
+                                            <li><strong class="text-white">Software Processed:</strong> File was saved/modified by editing software (e.g. Photoshop).</li>
+                                            <li><strong class="text-white">Unknown Origin:</strong> No definitive camera or software markers found.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-3 mb-3 border-end border-secondary">
+                                        <h6 class="neon-text small fw-bold">MISSING GPS DATA?</h6>
+                                        <p class="text-muted mb-0">Social media and messaging apps usually strip this for privacy. Absence doesn't mean the photo is fake.</p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="neon-text small fw-bold">LEGAL_PROTECTION_PROTOCOL</h6>
+                                        <p class="text-muted mb-0" style="font-size: 0.75rem;">Metadata can be manipulated. We provide investigative hypotheses, not proof of truth. You decide what it means. Our analysis is for information only and does not constitute forensic proof.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lead Magnet Banner -->
+<div class="lead-banner py-4 text-center mt-auto">
+    <div class="container">
+        <h5 class="pixel-font neon-text mb-3">WANT PROFESSIONAL FORENSIC UPDATES?</h5>
+        <p class="small text-muted mb-4">JOIN THE PRO_BETA ENROLLMENT LIST</p>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form id="leadFormTop" class="input-group">
+                    <input type="email" class="form-control" placeholder="AGENT_EMAIL@PROTO.COL" required>
+                    <button class="btn btn-primary" type="submit">ENROLL</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="copyToast" class="toast align-items-center text-white bg-dark border-success" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body neon-text">DATA COPIED TO CLIPBOARD</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+  <div id="leadToast" class="toast align-items-center text-white bg-dark border-success" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body neon-text">ENROLLMENT SUCCESSFUL. WELCOME, AGENT.</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+  <div id="reportToast" class="toast align-items-center text-white bg-dark border-success" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+          <div class="neon-text">FORENSIC REPORT DISPATCHED SUCCESSFULLY.</div>
+          <div class="small text-muted mt-1">Thank you for using MetaRead.</div>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Email Modal -->
+<div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title pixel-font" id="emailModalLabel"><i class="bi bi-shield-lock"></i> DISPATCH_REPORT // LEGAL_NOTICE</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-dark small mb-3 border-secondary" style="background: rgba(0, 255, 140, 0.05);">
+            <i class="bi bi-patch-check neon-text"></i> <span class="text-muted">MetaRead operates on a </span><strong class="neon-text">Zero-Storage Architecture</strong>. <span class="text-muted">Your files are processed entirely in volatile memory (RAM) and are never written to our persistent database or disks.</span>
+        </div>
+        <form id="emailReportForm">
+          <div class="mb-3">
+            <label for="reportEmail" class="form-label small pixel-font neon-text">DESTINATION_EMAIL</label>
+            <input type="email" class="form-control" id="reportEmail" placeholder="AGENT_NAME@SECURE.MAIL" required>
+            <div class="form-text text-muted small mt-2">A professional forensic report will be generated and sent to this address.</div>
+          </div>
+          <div class="mb-3">
+              <div class="form-check small text-muted">
+                  <input class="form-check-input" type="checkbox" id="acceptPrivacy" required>
+                  <label class="form-check-label" for="acceptPrivacy">
+                      I accept the transitory third-party processing protocol.
+                  </label>
+              </div>
+              <div style="font-size: 0.7rem; color: #777; line-height: 1.4;" class="mt-2 mb-0">
+                  <strong class="text-light">Data Transmission Disclosure:</strong> To deliver this report, the forensic data is transmitted via <strong class="text-white">Resend</strong> (a secure third-party email infrastructure). While MetaRead does not store your data, Resend may retain metadata logs for up to 30 days solely for delivery troubleshooting and anti-spam purposes. By requesting an email report, you acknowledge this transitory third-party processing and that this report is for <strong class="text-light">Investigative Use Only</strong>. You understand that metadata can be forged.
+              </div>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary pixel-font" id="sendReportBtn">INITIATE_DISPATCH</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Forensic Library Modal -->
+<div class="modal fade" id="forensicLibraryModal" tabindex="-1" aria-labelledby="forensicLibraryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title pixel-font" id="forensicLibraryModalLabel"><i class="bi bi-book"></i> FORENSIC_LIBRARY // PRO_TIPS</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          <div class="row">
+              <div class="col-md-4 border-end border-secondary">
+                  <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <button class="nav-link active small text-start mb-2" id="v-pills-indicators-tab" data-bs-toggle="pill" data-bs-target="#v-pills-indicators" type="button" role="tab">FORENSIC_INDICATORS</button>
+                    <button class="nav-link small text-start mb-2" id="v-pills-patterns-tab" data-bs-toggle="pill" data-bs-target="#v-pills-patterns" type="button" role="tab">TAMPERING_PATTERNS</button>
+                    <button class="nav-link small text-start mb-2" id="v-pills-tips-tab" data-bs-toggle="pill" data-bs-target="#v-pills-tips" type="button" role="tab">PRO_AGENT_TIPS</button>
+                  </div>
+              </div>
+              <div class="col-md-8">
+                  <div class="tab-content" id="v-pills-tabContent">
+                    <div class="tab-pane fade show active" id="v-pills-indicators" role="tabpanel">
+                        <h6 class="neon-text mb-3 small fw-bold text-uppercase">Core Forensic Indicators</h6>
+                        <div class="indicator-item mb-4">
+                            <strong class="text-white small">🔎 Metadata Stripping</strong>
+                            <p class="small text-muted mt-1" style="font-size: 0.75rem;">The process of removing all hidden information from a file (GPS, camera model, timestamps). Like a letter with the return address scrubbed off.</p>
+                        </div>
+                        <div class="indicator-item mb-4">
+                            <strong class="text-white small">🔢 Quantization Tables</strong>
+                            <p class="small text-muted mt-1" style="font-size: 0.75rem;">Every camera brand has its own "recipe" for saving photos. If a photo says it's from an iPhone but uses a Photoshop recipe, we know it's edited.</p>
+                        </div>
+                        <div class="indicator-item mb-4">
+                            <strong class="text-white small">🖼️ Thumbnail Mismatch</strong>
+                            <p class="small text-muted mt-1" style="font-size: 0.75rem;">A discrepancy between the main image and its internal preview. The thumbnail often reveals what was originally in the frame before edits.</p>
+                        </div>
+                        <div class="indicator-item mb-4">
+                            <strong class="text-white small">📍 GPS/Timezone Inconsistency</strong>
+                            <p class="small text-muted mt-1" style="font-size: 0.75rem;">When location data doesn't match the reported time. Critical for verifying alibis or event locations.</p>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="v-pills-patterns" role="tabpanel">
+                        <h6 class="neon-text mb-3 small fw-bold text-uppercase">Common Tampering Patterns</h6>
+                        <div class="pattern-item mb-4">
+                            <strong class="text-white small">📱 Social Media Sanitization</strong>
+                            <p class="small text-muted mt-1" style="font-size: 0.75rem;">Metadata is missing or says "WhatsApp/Facebook". Verdict: Original source trail destroyed by the platform.</p>
+                        </div>
+                        <div class="pattern-item mb-4">
+                            <strong class="text-white small">📸 Screenshot of a Fake</strong>
+                            <p class="small text-muted mt-1" style="font-size: 0.75rem;">Resolution matches a phone screen. The metadata tells us when the screenshot was taken, not when the content was created.</p>
+                        </div>
+                        <div class="pattern-item mb-4">
+                            <strong class="text-white small">🖌️ Professional Edit</strong>
+                            <p class="small text-muted mt-1" style="font-size: 0.75rem;">Software tag mentions Photoshop/GIMP. Explicit proof of software manipulation.</p>
+                        </div>
+                        <div class="pattern-item mb-4">
+                            <strong class="text-white small">🤖 AI Generation Signature</strong>
+                            <p class="small text-muted mt-1" style="font-size: 0.75rem;">CreatorTool mentions Midjourney/DALL-E. This image was generated or enhanced by AI, not a raw capture.</p>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="v-pills-tips" role="tabpanel">
+                        <h6 class="neon-text mb-3 small fw-bold text-uppercase">Pro Agent Tips</h6>
+                        <ul class="small text-muted" style="font-size: 0.75rem;">
+                            <li class="mb-2"><strong class="text-white">Check the Timeline:</strong> Compare Capture Date to Modification Date. Gaps > few mins suggest processing.</li>
+                            <li class="mb-2"><strong class="text-white">Trust the GPS:</strong> Harder to fake than dates. Always verify coordinates on a map.</li>
+                            <li class="mb-2"><strong class="text-white">Look for "WhatsApp":</strong> If present, the evidence trail is likely already broken.</li>
+                        </ul>
+                    </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CLOSE_LIBRARY</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="py-5 text-center small text-muted border-top border-secondary mt-5" style="background-color: #0d1110;">
+    <div class="container">
+        <p class="pixel-font neon-text mb-3">PRIVACY_PROTOCOL // ZERO_STORAGE_ENFORCED</p>
+        <p class="mb-4" style="max-width: 800px; margin: auto; line-height: 1.6;">
+            MetaRead operates a strict <strong class="text-white">No-Storage policy</strong>. Files are processed entirely in-memory and destroyed immediately upon session termination. We do not train AI models on user data. <span class="neon-text">Your privacy is our architecture, not just a policy.</span>
+        </p>
+        <p class="mb-0 pixel-font">&copy; 2026 CHECKYOURPHOTO // PRIVACY_ENFORCED // NO_STORAGE_POLICY</p>
+    </div>
+</footer>
+
+<!-- Bootstrap 5 JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- Marked (for AI summary markdown) -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+    // Configuration
+    const API_BASE_URL = ''; 
+    
+    // Anonymous Telemetry
+    let sessionId = localStorage.getItem('checkyourphoto_session_id');
+    if (!sessionId) {
+        sessionId = 'sess_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        localStorage.setItem('checkyourphoto_session_id', sessionId);
+    }
+
+    async function logEvent(eventName, eventData = {}) {
+        try {
+            await fetch(`${API_BASE_URL}/api/telemetry`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    event_name: eventName,
+                    ...eventData
+                })
+            });
+        } catch (e) {
+            console.error('Telemetry log failed', e);
+        }
+    }
+
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const loading = document.getElementById('loading');
+    const results = document.getElementById('results');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const rawSearch = document.getElementById('rawSearch');
+    
+    let currentMetadata = null;
+    let map = null;
+    let marker = null;
+    let isUploading = false;
+
+    uploadArea.onclick = () => {
+        if (!isUploading) fileInput.click();
+    };
+
+    uploadArea.ondragover = (e) => {
+        e.preventDefault();
+        if (!isUploading) uploadArea.classList.add('dragover');
+    };
+
+    uploadArea.ondragleave = () => {
+        uploadArea.classList.remove('dragover');
+    };
+
+    uploadArea.ondrop = (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        if (e.dataTransfer.files.length && !isUploading) {
+            handleFileUpload(e.dataTransfer.files[0]);
+        }
+    };
+
+    fileInput.onchange = (e) => {
+        if (e.target.files.length && !isUploading) {
+            handleFileUpload(e.target.files[0]);
+        }
+    };
+
+    async function handleFileUpload(file) {
+        if (isUploading) return;
+        isUploading = true;
+        
+        loading.style.display = 'block';
+        results.style.display = 'none';
+        
+        // Remove old error messages
+        const oldError = document.querySelector('.upload-error-msg');
+        if (oldError) oldError.remove();
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/extract`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Failed to extract metadata');
+            }
+
+            const data = await response.json();
+            currentMetadata = data;
+            displayResults(data, file.name);
+
+            logEvent('file_upload', {
+                file_type: data.FileType || file.type,
+                metadata_count: Object.keys(data).length,
+                has_gps: !!data.gps,
+                ai_summary_generated: !!data.ai_summary
+            });
+
+        } catch (error) {
+            console.error('Upload error:', error);
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'alert alert-danger mt-3 pixel-font small upload-error-msg';
+            errorMsg.innerHTML = `<i class="bi bi-exclamation-octagon"></i> ERROR: ${error.message.toUpperCase()}`;
+            uploadArea.parentNode.insertBefore(errorMsg, uploadArea.nextSibling);
+            logEvent('upload_error', { message: error.message });
+        } finally {
+            loading.style.display = 'none';
+            isUploading = false;
+        }
+    }
+
+    function displayResults(data, fileName) {
+        fileNameDisplay.textContent = fileName.toUpperCase();
+        results.style.display = 'block';
+        document.getElementById('proBadge').classList.remove('d-none');
+        
+        document.querySelectorAll('.interpretation-field').forEach(input => input.value = '');
+        
+        // Summary Tab
+        const forensicStatus = document.getElementById('val-forensic-status');
+        if (data.forensic_findings && data.forensic_findings.labels && data.forensic_findings.labels.length) {
+            forensicStatus.textContent = data.forensic_findings.labels[0].toUpperCase();
+        } else {
+            forensicStatus.textContent = 'UNKNOWN';
+        }
+
+        document.getElementById('val-capture-time').textContent = data.DateTimeOriginal || 'N/A';
+        document.getElementById('val-device').textContent = (data.Make !== 'N/A' || data.Model !== 'N/A') ? `${data.Make || ''} ${data.Model || ''}`.trim() : 'N/A';
+        document.getElementById('val-location').textContent = (data.GPSLatitude && data.GPSLongitude) ? `${data.GPSLatitude.toFixed(4)}, ${data.GPSLongitude.toFixed(4)}` : 'N/A';
+        document.getElementById('val-software').textContent = data.software || data.Software || 'N/A';
+
+        // Anomaly Matrix
+        const anomalySection = document.getElementById('anomalySection');
+        const anomalyList = document.getElementById('anomalyList');
+        const anomalyCount = document.getElementById('anomalyCount');
+        
+        anomalyList.innerHTML = '';
+        if (data.anomaly_flags && data.anomaly_flags.length > 0) {
+            anomalySection.style.display = 'block';
+            anomalyCount.textContent = `${data.anomaly_flags.length} FLAGS`;
+            
+            // Set count badge color based on highest severity
+            const hasHigh = data.anomaly_flags.some(a => a.severity === 'high');
+            anomalyCount.className = hasHigh ? 'badge severity-high' : 'badge severity-medium';
+
+            data.anomaly_flags.forEach(flag => {
+                const item = document.createElement('div');
+                item.className = `list-group-item bg-transparent border-secondary anomaly-item ${flag.severity} p-3`;
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="anomaly-badge severity-${flag.severity}">${flag.severity} RISK</span>
+                        <code class="small text-muted">${flag.code}</code>
+                    </div>
+                    <div class="small text-white">${flag.message}</div>
+                `;
+                anomalyList.appendChild(item);
+            });
+        } else {
+            anomalySection.style.display = 'none';
+        }
+
+        // File Integrity
+        document.getElementById('val-report-id').textContent = data.reportId || 'N/A';
+        document.getElementById('val-md5').textContent = data.md5 || 'N/A';
+        document.getElementById('val-sha256').textContent = data.sha256 || 'N/A';
+
+        // AI Summary
+        document.getElementById('aiExplanation').innerHTML = marked.parse(data.ai_summary || 'No AI summary available.');
+
+        // Raw EXIF Tab
+        populateRawTable(data);
+
+        // GPS Map Tab
+        initMap(data);
+
+        // Timeline Tab
+        populateTimeline(data);
+        
+        // Scroll to results
+        results.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function populateRawTable(data) {
+        const body = document.getElementById('rawExifBody');
+        body.innerHTML = '';
+        
+        Object.keys(data).sort().forEach((key, index) => {
+            if (key === 'ai_summary' || key === 'timeline' || key === 'gps' || (typeof data[key] === 'object' && !data[key].rawValue)) return;
+            
+            const tr = document.createElement('tr');
+            const tdKey = document.createElement('td');
+            const tdVal = document.createElement('td');
+            const tdAction = document.createElement('td');
+            
+            tdKey.innerHTML = `<code class="small">${key}</code>`;
+            const val = typeof data[key] === 'object' ? data[key].rawValue || JSON.stringify(data[key]) : data[key];
+            const valId = `raw-val-${index}`;
+            tdVal.id = valId;
+            tdVal.className = 'small';
+            tdVal.textContent = val;
+            
+            tdAction.innerHTML = `<button class="btn btn-sm btn-link p-0 neon-text" onclick="copyText('${valId}')"><i class="bi bi-clipboard"></i></button>`;
+            
+            tr.appendChild(tdKey);
+            tr.appendChild(tdVal);
+            tr.appendChild(tdAction);
+            body.appendChild(tr);
+        });
+    }
+
+    rawSearch.oninput = () => {
+        const query = rawSearch.value.toLowerCase();
+        const rows = document.querySelectorAll('#rawExifBody tr');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(query) ? '' : 'none';
+        });
+    };
+
+    function initMap(data) {
+        const noGps = document.getElementById('noGpsMessage');
+        const mapDiv = document.getElementById('map');
+        
+        const gpsData = data.gps || (data.GPSLatitude && data.GPSLongitude ? { lat: data.GPSLatitude, lng: data.GPSLongitude } : null);
+
+        if (!gpsData || !gpsData.lat || !gpsData.lng) {
+            noGps.style.display = 'block';
+            mapDiv.style.display = 'none';
+            return;
+        }
+
+        noGps.style.display = 'none';
+        mapDiv.style.display = 'block';
+
+        const lat = gpsData.lat;
+        const lng = gpsData.lng;
+
+        if (!map) {
+            map = L.map('map').setView([lat, lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OSINT_MAPPING'
+            }).addTo(map);
+            marker = L.marker([lat, lng]).addTo(map);
+        } else {
+            map.setView([lat, lng], 13);
+            marker.setLatLng([lat, lng]);
+        }
+        
+        if (gpsData.readable_location) {
+            marker.bindPopup(`<b class="neon-text">LOCATION:</b> ${gpsData.readable_location}`).openPopup();
+        }
+        
+        setTimeout(() => map.invalidateSize(), 200);
+    }
+
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', (e) => {
+            const tabId = e.target.id.replace('-tab', '');
+            if (tabId === 'gps' && map) map.invalidateSize();
+            logEvent('tab_switch', { tab_engaged: tabId });
+        });
+    });
+
+    function populateTimeline(data) {
+        const container = document.getElementById('timelineContainer');
+        container.innerHTML = '';
+        let events = [];
+        if (data.timeline && Array.isArray(data.timeline)) {
+            events = data.timeline;
+        }
+
+        if (events.length === 0) {
+            container.innerHTML = '<div class="alert alert-dark small text-center">NO TEMPORAL DATA STREAM AVAILABLE</div>';
+            return;
+        }
+
+        events.forEach(ev => {
+            const div = document.createElement('div');
+            div.className = 'timeline-item';
+            const proTag = ev.isEmbedded ? '<span class="badge bg-primary text-dark ms-2" style="font-size: 0.5rem;">PRO_DATA</span>' : '';
+            div.innerHTML = `
+                <div class="d-flex justify-content-between">
+                    <h6 class="mb-0 neon-text pixel-font small">${ev.event.toUpperCase()}${proTag}</h6>
+                    <small class="text-muted fw-bold">${ev.timestamp}</small>
+                </div>
+                <p class="mb-0 small mt-1" style="color: #999;">${ev.description || ''}</p>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function copyText(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.innerText || element.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+            toast.show();
+        });
+    }
+
+    document.getElementById('exportJson').onclick = () => {
+        if (!currentMetadata) return;
+        logEvent('export_click', { export_type: 'json' });
+        
+        const exportData = {
+            metadata: currentMetadata,
+            interpretations: {
+                capture_time: document.getElementById('interp-capture-time').value,
+                device: document.getElementById('interp-device').value,
+                location: document.getElementById('interp-location').value,
+                software: document.getElementById('interp-software').value
+            },
+            exported_at: new Date().toISOString()
+        };
+        
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "FORENSIC_REPORT_" + Date.now() + ".json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    };
+
+    document.getElementById('downloadPdf').onclick = async () => {
+        if (!currentMetadata) return;
+        logEvent('export_click', { export_type: 'pdf_server' });
+        
+        const btn = document.getElementById('downloadPdf');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> GENERATING...';
+
+        const reportData = {
+            ...currentMetadata,
+            interpretations: {
+                capture_time: document.getElementById('interp-capture-time').value,
+                device: document.getElementById('interp-device').value,
+                location: document.getElementById('interp-location').value,
+                software: document.getElementById('interp-software').value
+            }
+        };
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/generate-pdf`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ forensicData: reportData })
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `FORENSIC_REPORT_${currentMetadata.reportId || Date.now()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                throw new Error('Failed to generate PDF report');
+            }
+        } catch (err) {
+            console.error('PDF generation failed', err);
+            alert('PDF GENERATION FAILED. SERVER SIDE GENERATOR MAY BE OFFLINE.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    };
+
+    document.getElementById('leadFormTop').onsubmit = async (e) => {
+        e.preventDefault();
+        const email = e.target.querySelector('input').value;
+        const btn = e.target.querySelector('button');
+        btn.disabled = true;
+        btn.textContent = 'LINKING...';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/leads`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, session_id: sessionId })
+            });
+
+            if (response.ok) {
+                const toast = new bootstrap.Toast(document.getElementById('leadToast'));
+                toast.show();
+                e.target.innerHTML = '<span class="neon-text pixel-font small"><i class="bi bi-shield-check"></i> AGENT_ACCEPTED</span>';
+                logEvent('lead_captured', { email_provided: true });
+            }
+        } catch (err) {
+            console.error('Lead capture failed', err);
+            btn.disabled = false;
+            btn.textContent = 'RETRY';
+        }
+    };
+
+    document.getElementById('emailReportForm').onsubmit = async (e) => {
+        e.preventDefault();
+        if (!currentMetadata) return;
+
+        const email = document.getElementById('reportEmail').value;
+        const btn = document.getElementById('sendReportBtn');
+        const originalText = btn.textContent;
+        
+        btn.disabled = true;
+        btn.textContent = 'DISPATCHING...';
+
+        const reportData = {
+            ...currentMetadata,
+            interpretations: {
+                capture_time: document.getElementById('interp-capture-time').value,
+                device: document.getElementById('interp-device').value,
+                location: document.getElementById('interp-location').value,
+                software: document.getElementById('interp-software').value
+            }
+        };
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/send-report`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, forensicData: reportData })
+            });
+
+            if (response.ok) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('emailModal'));
+                modal.hide();
+                const toast = new bootstrap.Toast(document.getElementById('reportToast'));
+                toast.show();
+                logEvent('report_emailed', { email_provided: true });
+            } else {
+                throw new Error('Server returned an error');
+            }
+        } catch (err) {
+            console.error('Email dispatch failed', err);
+            alert('REPORT DISPATCH FAILED. PLEASE VERIFY CONNECTION.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    };
+
+    // Tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+</body>
+</html>

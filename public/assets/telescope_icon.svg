@@ -1,0 +1,12 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Telescope Body -->
+  <path d="M 10 40 L 50 15" stroke="#00FF8C" stroke-width="3" stroke-linecap="round" />
+  <path d="M 12 43 L 52 18" stroke="#00FF8C" stroke-width="3" stroke-linecap="round" />
+  <rect x="50" y="10" width="6" height="12" transform="rotate(32, 50, 10)" fill="#00FF8C" />
+  <rect x="8" y="38" width="4" height="8" transform="rotate(32, 8, 38)" fill="#00FF8C" />
+  
+  <!-- Tripod -->
+  <path d="M 30 30 L 20 50" stroke="#00FF8C" stroke-width="2" stroke-linecap="round" />
+  <path d="M 30 30 L 40 50" stroke="#00FF8C" stroke-width="2" stroke-linecap="round" />
+  <path d="M 30 30 L 30 55" stroke="#00FF8C" stroke-width="2" stroke-linecap="round" />
+</svg>
