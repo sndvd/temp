@@ -391,6 +391,21 @@
         .anomaly-item.high { border-left-color: #ff4d4d; }
         .anomaly-item.medium { border-left-color: #ffa500; }
         .anomaly-item.low { border-left-color: var(--accent-color); }
+
+        /* Improved visibility for muted text on dark background */
+        .text-muted {
+            color: #a0a0a0 !important;
+        }
+
+        .footer-copyright {
+            color: #ccc !important;
+            opacity: 0.9;
+        }
+
+        ::placeholder {
+            color: #999 !important;
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -659,7 +674,7 @@
 <div class="lead-banner py-4 text-center mt-auto">
     <div class="container">
         <h5 class="pixel-font neon-text mb-3">WANT PROFESSIONAL FORENSIC UPDATES?</h5>
-        <p class="small text-muted mb-4">JOIN THE PRO_BETA ENROLLMENT LIST</p>
+        <p class="small text-white opacity-75 mb-4">JOIN THE PRO_BETA ENROLLMENT LIST</p>
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <form id="leadFormTop" class="input-group">
@@ -816,7 +831,7 @@
         <p class="mb-4" style="max-width: 800px; margin: auto; line-height: 1.6;">
             MetaRead operates a strict <strong class="text-white">No-Storage policy</strong>. Files are processed entirely in-memory and destroyed immediately upon session termination. We do not train AI models on user data. <span class="neon-text">Your privacy is our architecture, not just a policy.</span>
         </p>
-        <p class="mb-0 pixel-font">&copy; 2026 CHECKYOURPHOTO // PRIVACY_ENFORCED // NO_STORAGE_POLICY</p>
+        <p class="mb-0 pixel-font footer-copyright">&copy; 2026 CHECKYOURPHOTO // PRIVACY_ENFORCED // NO_STORAGE_POLICY</p>
     </div>
 </footer>
 
