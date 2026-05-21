@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Guide - Check Your Photo</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Orbitron, Silkscreen & Big Shoulders Display -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Silkscreen&family=Big+Shoulders+Display:wght@900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #101314;
+            --card-bg: #141C1A;
+            --accent-color: #00FF8C;
+            --text-color: #e0e0e0;
+            --neon-text-glow: 0 0 5px rgba(0, 255, 140, 0.7);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Orbitron', sans-serif;
+            background-image: 
+                linear-gradient(rgba(0, 255, 140, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 140, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            padding: 50px 0;
+        }
+
+        .brand-font { font-family: 'Big Shoulders Display', sans-serif; text-transform: uppercase; }
+        .pixel-font { font-family: 'Silkscreen', cursive; }
+        .neon-text { color: var(--accent-color); text-shadow: var(--neon-text-glow); }
+
+        .container {
+            max-width: 900px;
+            background-color: rgba(20, 28, 26, 0.9);
+            border: 1px solid rgba(0, 255, 140, 0.2);
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 { font-size: 3.5rem; margin-bottom: 0.5rem; }
+        h2 { font-family: 'Silkscreen', cursive; color: var(--accent-color); margin-top: 2.5rem; border-bottom: 1px solid rgba(0, 255, 140, 0.3); padding-bottom: 10px; }
+        h3 { font-size: 1.2rem; margin-top: 1.5rem; color: #fff; }
+        
+        .content {
+            font-family: 'Trebuchet MS', sans-serif;
+            line-height: 1.8;
+            color: #bbb;
+        }
+
+        .color-box {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            border-radius: 4px;
+            margin-right: 15px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .color-label { display: block; font-size: 0.8rem; text-align: center; margin-top: 5px; color: #fff; }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: var(--accent-color);
+            text-decoration: none;
+            font-family: 'Silkscreen', cursive;
+        }
+
+        ul { padding-left: 20px; }
+        code { color: var(--accent-color); background: rgba(0, 255, 140, 0.1); padding: 2px 5px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/" class="back-link">&lt; RETURN_TO_APP</a>
+    
+    <h1 class="brand-font neon-text">BRAND_GUIDE</h1>
+    <p class="pixel-font small">VERSION 1.0 // FORENSIC_IDENTITY_PROTOCOL</p>
+
+    <div class="content mt-5">
+        <h2>1. BRAND IDENTITY</h2>
+        <h3>CORE PHILOSOPHY</h3>
+        <p>"We show you what's in the file. You decide what it means."</p>
+        
+        <h3>PERSONALITY</h3>
+        <ul>
+            <li><strong>Objective:</strong> Neutral mirror. No judgment.</li>
+            <li><strong>Sharp:</strong> Technical precision.</li>
+            <li><strong>Cybernetic:</strong> Digital-Human bridge.</li>
+        </ul>
+
+        <h2>2. VISUAL IDENTITY</h2>
+        <h3>COLOR PALETTE</h3>
+        <div class="d-flex flex-wrap mt-3">
+            <div><div class="color-box" style="background-color: #101314;"></div><span class="color-label">#101314</span></div>
+            <div><div class="color-box" style="background-color: #00FF8C;"></div><span class="color-label">#00FF8C</span></div>
+            <div><div class="color-box" style="background-color: #FF4D4D;"></div><span class="color-label">#FF4D4D</span></div>
+            <div><div class="color-box" style="background-color: #FFA500;"></div><span class="color-label">#FFA500</span></div>
+            <div><div class="color-box" style="background-color: #E0E0E0;"></div><span class="color-label">#E0E0E0</span></div>
+        </div>
+
+        <h3>TYPOGRAPHY</h3>
+        <ul>
+            <li><strong>Hero:</strong> Big Shoulders Display</li>
+            <li><strong>System:</strong> Silkscreen</li>
+            <li><strong>Technical:</strong> Orbitron</li>
+            <li><strong>Reading:</strong> Trebuchet MS</li>
+        </ul>
+
+        <h2>3. UI/UX PRINCIPLES</h2>
+        <h3>THE "MATRIX" AESTHETIC</h3>
+        <ul>
+            <li>Subtle 50px Grid backgrounds</li>
+            <li>Animated Laser Scan Lines</li>
+            <li>Corner Focus Markers (HUD style)</li>
+        </ul>
+
+        <h2>4. COMPLIANCE</h2>
+        <p>Ensure the <code>ZERO_STORAGE_DISCLAIMER</code> is visible on all data dispatch interfaces. Hypotheses must always be framed as investigative, not definitive.</p>
+    </div>
+</div>
+
+</body>
+</html>
