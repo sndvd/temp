@@ -32,12 +32,22 @@ function detectAnomalies(metadata) {
     const aiKeywords = ['midjourney', 'dall-e', 'stable diffusion', 'adobe firefly', 'generative ai'];
     const softwareLower = (software || '').toLowerCase();
     const creatorToolLower = (creatorTool || '').toLowerCase();
+    const parameters = getVal(metadata.parameters || '');
+    const prompt = getVal(metadata.prompt || '');
+    const seed = getVal(metadata.Seed || '');
     
-    if (aiKeywords.some(kw => softwareLower.includes(kw) || creatorToolLower.includes(kw))) {
+    if (aiKeywords.some(kw => softwareLower.includes(kw) || creatorToolLower.includes(kw) || parameters.toLowerCase().includes(kw) || prompt.toLowerCase().includes(kw))) {
         flags.push({
             code: 'AI_TRACE',
             severity: 'high',
             message: 'AI generation signature detected in software metadata.'
+        });
+    }
+    if (parameters || prompt || seed) {
+        flags.push({
+            code: 'AI_ARTIFACTS',
+            severity: 'high',
+            message: `Generative artifacts detected: ${[parameters ? 'Prompt' : '', seed ? 'Seed' : ''].filter(Boolean).join(', ')} found in hidden headers.`
         });
     }
     if (digitalSourceType === 'trainedAlgorithmicMedia' || digitalSourceType === 'compositeWithTrainedAlgorithmicMedia') {

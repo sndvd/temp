@@ -499,6 +499,24 @@
                             </div>
                             <div class="row" id="summaryContent">
                                 <div class="col-md-6 mb-3">
+                                    <div class="card mb-3" id="aiArtifactsSection" style="display: none; border-color: #ffcc00; background: rgba(255, 204, 0, 0.05);">
+                                        <div class="card-body p-3">
+                                            <label class="form-label small text-uppercase fw-bold text-warning mb-1"><i class="bi bi-robot"></i> GENERATIVE_ARTIFACTS</label>
+                                            <div id="aiPromptContainer" style="display: none;" class="mb-2">
+                                                <label class="form-label x-small text-muted mb-0">Detected Prompt</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="form-control bg-transparent text-white border-secondary small" id="val-ai-prompt" style="font-size: 0.75rem; white-space: pre-wrap;"></span>
+                                                </div>
+                                            </div>
+                                            <div id="aiSeedContainer" style="display: none;">
+                                                <label class="form-label x-small text-muted mb-0">Detected Seed</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="form-control bg-transparent text-white border-secondary small" id="val-ai-seed"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="card mb-3">
                                         <div class="card-body p-3">
                                             <label class="form-label small text-uppercase fw-bold text-muted mb-1" data-bs-toggle="tooltip" title="Embedded time when the media was originally captured. Discrepancies with file dates suggest editing.">Capture Timestamp <i class="bi bi-info-circle" style="font-size: 0.7rem;"></i> <a href="#" class="ms-1 neon-text text-decoration-none" data-bs-toggle="modal" data-bs-target="#forensicLibraryModal" style="font-size: 0.6rem;">[INFO]</a></label>
@@ -980,6 +998,31 @@
         document.getElementById('val-device').textContent = (data.Make !== 'N/A' || data.Model !== 'N/A') ? `${data.Make || ''} ${data.Model || ''}`.trim() : 'N/A';
         document.getElementById('val-location').textContent = (data.GPSLatitude && data.GPSLongitude) ? `${data.GPSLatitude.toFixed(4)}, ${data.GPSLongitude.toFixed(4)}` : 'N/A';
         document.getElementById('val-software').textContent = data.software || data.Software || 'N/A';
+
+        // AI Artifacts
+        const aiSection = document.getElementById('aiArtifactsSection');
+        const promptContainer = document.getElementById('aiPromptContainer');
+        const seedContainer = document.getElementById('aiSeedContainer');
+        const promptVal = document.getElementById('val-ai-prompt');
+        const seedVal = document.getElementById('val-ai-seed');
+
+        if (data.forensic_findings && (data.forensic_findings.prompt || data.forensic_findings.seed)) {
+            aiSection.style.display = 'block';
+            if (data.forensic_findings.prompt) {
+                promptContainer.style.display = 'block';
+                promptVal.textContent = data.forensic_findings.prompt;
+            } else {
+                promptContainer.style.display = 'none';
+            }
+            if (data.forensic_findings.seed) {
+                seedContainer.style.display = 'block';
+                seedVal.textContent = data.forensic_findings.seed;
+            } else {
+                seedContainer.style.display = 'none';
+            }
+        } else {
+            aiSection.style.display = 'none';
+        }
 
         // Anomaly Matrix
         const anomalySection = document.getElementById('anomalySection');

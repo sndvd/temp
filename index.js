@@ -81,7 +81,8 @@ function formatMetadataForAI(metadata) {
         'CreateDate', 'ModifyDate', 'GPSLatitude', 'GPSLongitude',
         'ImageSize', 'FileType', 'UserComment', 'History',
         'DigitalSourceType', 'SourceType', 'Credit', 'Source',
-        'Author', 'Creator', 'CreatorTool', 'ProfileDescription'
+        'Author', 'Creator', 'CreatorTool', 'ProfileDescription',
+        'parameters', 'prompt', 'Seed'
     ];
 
     const filtered = {};
@@ -139,13 +140,20 @@ function analyzeForensicSignature(metadata) {
     const aiMatchedMarker = aiBlacklist.find(marker => 
         software.toLowerCase().includes(marker.toLowerCase()) || 
         sourceType.toLowerCase().includes(marker.toLowerCase()) ||
-        userComment.toLowerCase().includes(marker.toLowerCase())
+        userComment.toLowerCase().includes(marker.toLowerCase()) ||
+        getVal(metadata.parameters || '').toLowerCase().includes(marker.toLowerCase()) ||
+        getVal(metadata.prompt || '').toLowerCase().includes(marker.toLowerCase())
     );
 
-    if (aiMatchedMarker || sourceType === 'trainedAlgorithmicMedia') {
+    if (aiMatchedMarker || sourceType === 'trainedAlgorithmicMedia' || metadata.parameters || metadata.prompt) {
         findings.isAiGenerated = true;
-        findings.labels.push(`AI Signature Detected: ${aiMatchedMarker || 'trainedAlgorithmicMedia'}`);
+        findings.labels.push(`AI Signature Detected: ${aiMatchedMarker || 'Generative Artifacts'}`);
         findings.confidenceScore = 1.0;
+        
+        // Extract prompt/seed if available
+        if (metadata.parameters) findings.prompt = getVal(metadata.parameters);
+        if (metadata.prompt) findings.prompt = getVal(metadata.prompt);
+        if (metadata.Seed) findings.seed = getVal(metadata.Seed);
     }
 
     // 2. Check for Camera capture
@@ -258,7 +266,7 @@ async function getMockAiSummary(metadataJson, forensic) {
 - **Forensic Status**: ${forensic.isAiGenerated ? 'AI Generated' : (forensic.isCameraCaptured ? 'Camera Capture' : 'Software Edited / Unknown')}
 - **Embedded Timestamp**: ${whenTaken} (Internal Clock)
 - **Technical Chain**: ${forensic.labels.join(' -> ')}
-- **Anomaly Matrix**: No significant hardware-software timestamp conflicts detected in this mock analysis.
+${forensic.prompt ? `- **AI Prompt**: ${forensic.prompt}\n` : ''}${forensic.seed ? `- **AI Seed**: ${forensic.seed}\n` : ''}- **Anomaly Matrix**: No significant hardware-software timestamp conflicts detected in this mock analysis.
 - **Forensic Methodology Disclosure**: Analysis aligned with ISO 12234-2 (EXIF) and IPTC Photo Metadata standards.
 - **Evidence Summary**: ${forensic.isAiGenerated ? 'WARNING: AI generation markers detected.' : (forensic.isCameraCaptured ? 'Authentic camera metadata signatures identified.' : 'Generic file signatures found.')}`;
 }
@@ -276,7 +284,7 @@ CRITICAL RULES:
    - GPS Location Timezones vs. Recorded UTC Offsets.
    - MakerNote signatures vs. generic Software tags.
 3. FORENSIC TERMINOLOGY: Use professional terms: 'Latent Metadata', 'Signature Discrepancy', 'XMP Serialization', 'Transitory Encoding'.
-4. AI ATTRIBUTION: Report specific AI markers: ${forensic.labels.join(', ')}.
+4. AI ATTRIBUTION: Report specific AI markers: ${forensic.labels.join(', ')}. Mention AI Prompts or Seeds if detected in metadata (${forensic.prompt ? 'Prompt detected' : 'No prompt'}, ${forensic.seed ? 'Seed detected' : 'No seed'}).
 5. METHODOLOGY: State that analysis aligns with ISO 12234-2 and IPTC standards.`;
 
     const userPrompt = `Audit the following metadata.\n\nMETADATA:\n${metadataJson}\n\nStrictly follow this output format:\n- **Forensic Status**: [Hypothesis on origin: Camera Capture / AI Generated / Software Edited]\n- **Embedded Timestamp**: [Friendly date/time from DateTimeOriginal or CreateDate]\n- **Technical Chain**: [Chronological reconstruction of software/hardware interaction]\n- **Anomaly Matrix**: [Table or list of conflicting metadata fields, if any]\n- **Forensic Methodology Disclosure**: [Standard disclaimer on methodology]\n- **Evidence Summary**: [Professional technical summary of findings]`;
