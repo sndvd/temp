@@ -12,6 +12,7 @@ const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const puppeteer = require('puppeteer');
 const { detectAnomalies } = require('./anomalyDetection');
+const { Buffer } = require('buffer');
 
 const app = express();
 const port = process.env.PORT || 3003;
@@ -303,6 +304,47 @@ CRITICAL RULES:
         return "Error: Forensic audit failed.";
     }
 }
+
+/**
+ * Sanitize Image: Strip all metadata
+ */
+app.post('/api/sanitize', upload.single('file'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const tempPath = path.join(os.tmpdir(), `sanitize_${Date.now()}_${req.file.originalname}`);
+    const outputPath = path.join(os.tmpdir(), `clean_${Date.now()}_${req.file.originalname}`);
+
+    try {
+        fs.writeFileSync(tempPath, req.file.buffer);
+
+        // exiftool -all= strips everything. -overwrite_original is implied by writing to a new path.
+        await new Promise((resolve, reject) => {
+            exec(`exiftool -all= -o "${outputPath}" "${tempPath}"`, (error, stdout, stderr) => {
+                if (error) {
+                    console.error('Exiftool sanitize error:', stderr);
+                    return reject(new Error('Failed to sanitize file'));
+                }
+                resolve();
+            });
+        });
+
+        const cleanedBuffer = fs.readFileSync(outputPath);
+        
+        res.setHeader('Content-Type', req.file.mimetype);
+        res.setHeader('Content-Disposition', `attachment; filename="CLEANED_${req.file.originalname}"`);
+        res.send(cleanedBuffer);
+
+    } catch (error) {
+        console.error('Sanitize endpoint error:', error);
+        res.status(500).json({ error: 'Failed to process file' });
+    } finally {
+        // Cleanup
+        if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+        if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+    }
+});
 
 /**
  * Formats a forensic report for HTML (used for Email and PDF)

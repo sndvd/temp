@@ -451,6 +451,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-2">
                         <h5 id="fileNameDisplay" class="neon-text pixel-font mb-0">TARGET_FILE.DAT</h5>
                         <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-outline-secondary me-2" id="sanitizeImgBtn"><i class="bi bi-shield-shaded"></i> SANITIZE & DOWNLOAD</button>
                             <button class="btn btn-sm btn-primary me-2" id="emailReportBtn" data-bs-toggle="modal" data-bs-target="#emailModal"><i class="bi bi-envelope"></i> EMAIL REPORT <span class="badge bg-dark text-primary ms-1" style="font-size: 0.6rem;">PRO</span></button>
                             <button class="btn btn-sm btn-outline-secondary me-2" id="exportJson"><i class="bi bi-filetype-json"></i> JSON</button>
                             <button class="btn btn-sm btn-primary" id="downloadPdf"><i class="bi bi-file-earmark-pdf"></i> DOWNLOAD REPORT <span class="badge bg-dark text-primary ms-1" style="font-size: 0.6rem;">PRO</span></button>
@@ -898,6 +899,7 @@
     const rawSearch = document.getElementById('rawSearch');
     
     let currentMetadata = null;
+    let currentFile = null;
     let map = null;
     let marker = null;
     let isUploading = false;
@@ -932,6 +934,7 @@
     async function handleFileUpload(file) {
         if (isUploading) return;
         isUploading = true;
+        currentFile = file;
         
         loading.style.display = 'block';
         results.style.display = 'none';
@@ -1191,6 +1194,50 @@
             toast.show();
         });
     }
+
+    document.getElementById('sanitizeImgBtn').onclick = async () => {
+        if (!currentFile) return;
+        logEvent('sanitize_click');
+        
+        const btn = document.getElementById('sanitizeImgBtn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> SCRUBBING...';
+
+        const formData = new FormData();
+        formData.append('file', currentFile);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/sanitize`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `CLEANED_${currentFile.name}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+                
+                const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+                document.querySelector('#copyToast .toast-body').textContent = 'IMAGE METADATA SCRUBBED & DOWNLOADED';
+                toast.show();
+            } else {
+                throw new Error('Failed to sanitize image');
+            }
+        } catch (err) {
+            console.error('Sanitization failed', err);
+            alert('SANITIZATION FAILED. PLEASE VERIFY CONNECTION.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    };
 
     document.getElementById('exportJson').onclick = () => {
         if (!currentMetadata) return;
