@@ -509,6 +509,19 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 mt-4">
+                            <button class="btn btn-primary flex-grow-1 py-3 pixel-font" id="cleanMetaBtn">
+                                <i class="bi bi-shield-shaded"></i> CLEAN METADATA
+                            </button>
+                            <button class="btn btn-outline-secondary flex-grow-1 py-3 pixel-font" id="downloadPdf">
+                                <i class="bi bi-file-earmark-pdf"></i> DOWNLOAD REPORT
+                            </button>
+                            <button class="btn btn-outline-secondary py-3 px-4" id="exportJson" title="Export RAW JSON">
+                                <i class="bi bi-code-square"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -929,6 +942,102 @@
             if (tabId === 'gps' && map) setTimeout(() => map.invalidateSize(), 200);
         });
     });
+
+    // Client-side PDF Generation Logic
+    document.getElementById('downloadPdf').onclick = async () => {
+        if (!currentMetadata) return;
+        const btn = document.getElementById('downloadPdf');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> GENERATING...';
+
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const accentColor = [0, 255, 140]; // Cyberpunk green
+
+            // Header
+            doc.setFillColor(20, 20, 25);
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+            doc.setFontSize(22);
+            doc.text('CHECKYOURPHOTO_FORENSIC_REPORT', 10, 25);
+            doc.setFontSize(10);
+            doc.setTextColor(150, 150, 150);
+            doc.text('DECRYPTED_DATA_OUTPUT // ' + new Date().toISOString(), 10, 35);
+
+            // Summary Info
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(14);
+            doc.text('1. FILE_IDENTIFICATION', 10, 50);
+            doc.autoTable({
+                startY: 55,
+                head: [['Property', 'Value']],
+                body: [
+                    ['Filename', currentMetadata.SourceFile || 'N/A'],
+                    ['Report ID', currentMetadata.reportId || 'N/A'],
+                    ['MD5', currentMetadata.md5 || 'N/A'],
+                    ['SHA-256', currentMetadata.sha256 || 'N/A'],
+                    ['Status', document.getElementById('val-forensic-status').textContent]
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [40, 40, 45] }
+            });
+
+            // Metadata Overview
+            doc.setFontSize(14);
+            doc.text('2. METADATA_OVERVIEW', 10, doc.lastAutoTable.finalY + 15);
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 20,
+                head: [['Category', 'Details']],
+                body: [
+                    ['Capture Time', currentMetadata.DateTimeOriginal || 'N/A'],
+                    ['Hardware', (currentMetadata.Make || '') + ' ' + (currentMetadata.Model || '')],
+                    ['Software', currentMetadata.Software || 'N/A'],
+                    ['Coordinates', currentMetadata.gps ? `${currentMetadata.gps.lat}, ${currentMetadata.gps.lng}` : 'N/A']
+                ],
+                theme: 'grid'
+            });
+
+            // AI Summary
+            if (currentMetadata.ai_summary) {
+                doc.addPage();
+                doc.setFillColor(20, 20, 25);
+                doc.rect(0, 0, 210, 20, 'F');
+                doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+                doc.text('3. AI_INTELLIGENCE_SUMMARY', 10, 13);
+                
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(10);
+                const splitText = doc.splitTextToSize(currentMetadata.ai_summary.replace(/#/g, ''), 180);
+                doc.text(splitText, 10, 30);
+            }
+
+            // Anomalies
+            if (currentMetadata.anomaly_flags && currentMetadata.anomaly_flags.length > 0) {
+                doc.setFontSize(14);
+                const y = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 30;
+                doc.text('4. ANOMALY_MATRIX', 10, y > 250 ? 30 : y); 
+                if (y > 250) doc.addPage();
+
+                doc.autoTable({
+                    startY: y > 250 ? 40 : y + 5,
+                    head: [['Severity', 'Type', 'Description']],
+                    body: currentMetadata.anomaly_flags.map(a => [a.severity.toUpperCase(), a.type || 'N/A', a.message || a.description]),
+                    theme: 'striped',
+                    headStyles: { fillColor: [200, 0, 0] }
+                });
+            }
+
+            doc.save(`FORENSIC_REPORT_${currentMetadata.reportId || 'FILE'}.pdf`);
+            logEvent('export_click', { type: 'pdf_client' });
+        } catch (e) {
+            console.error('PDF Generation Error:', e);
+            alert('PDF ERROR: ' + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-file-earmark-pdf"></i> DOWNLOAD REPORT';
+        }
+    };
 </script>
 </body>
 </html>
