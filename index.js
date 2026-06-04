@@ -51,23 +51,38 @@ const upload = multer({
     }
 });
 
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database(path.join(__dirname, 'database.sqlite'));
+
+// Initialize tables
+db.serialize(() => {
+    db.run(`CREATE TABLE IF NOT EXISTS usage (identifier TEXT, scan_date TEXT, count INTEGER)`);
+    db.run(`CREATE TABLE IF NOT EXISTS leads (email TEXT, session_id TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
+    db.run(`CREATE TABLE IF NOT EXISTS telemetry (
+        session_id TEXT, 
+        event_name TEXT, 
+        file_type TEXT, 
+        metadata_count INTEGER, 
+        has_gps INTEGER, 
+        ai_summary_generated INTEGER, 
+        tab_engaged TEXT, 
+        export_type TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+});
+
 /**
- * Helper to run team-db commands
+ * Helper to run SQLite commands
  */
-function runQuery(sql) {
+function runQuery(sql, params = []) {
     return new Promise((resolve, reject) => {
-        const escapedSql = sql.replace(/"/g, '\\"');
-        exec(`team-db "${escapedSql}"`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`team-db error: ${error.message}`);
-                return reject(error);
+        const method = sql.trim().toUpperCase().startsWith('SELECT') ? 'all' : 'run';
+        db[method](sql, params, function(err, result) {
+            if (err) {
+                console.error(`Database error: ${err.message}`);
+                return reject(err);
             }
-            try {
-                const result = JSON.parse(stdout);
-                resolve(result);
-            } catch (e) {
-                resolve(stdout);
-            }
+            resolve(method === 'all' ? result : this);
         });
     });
 }
@@ -78,11 +93,11 @@ function runQuery(sql) {
 async function checkUsage(identifier) {
     const today = new Date().toISOString().split('T')[0];
     try {
-        const result = await runQuery(`SELECT count FROM usage WHERE identifier = '${identifier}' AND scan_date = '${today}'`);
+        const result = await runQuery(`SELECT count FROM usage WHERE identifier = ? AND scan_date = ?`, [identifier, today]);
         if (result && result.length > 0) {
             return result[0].count;
         } else {
-            await runQuery(`INSERT INTO usage (identifier, scan_date, count) VALUES ('${identifier}', '${today}', 0)`);
+            await runQuery(`INSERT INTO usage (identifier, scan_date, count) VALUES (?, ?, 0)`, [identifier, today]);
             return 0;
         }
     } catch (e) {
@@ -94,7 +109,7 @@ async function checkUsage(identifier) {
 async function incrementUsage(identifier) {
     const today = new Date().toISOString().split('T')[0];
     try {
-        await runQuery(`UPDATE usage SET count = count + 1 WHERE identifier = '${identifier}' AND scan_date = '${today}'`);
+        await runQuery(`UPDATE usage SET count = count + 1 WHERE identifier = ? AND scan_date = ?`, [identifier, today]);
     } catch (e) {
         console.error('Usage increment failed:', e);
     }
@@ -264,7 +279,7 @@ async function getMockAiSummary(metadataJson, forensic) {
 }
 
 async function getRealAiSummary(metadataJson, forensic) {
-    const systemMsg = `You are a professional forensic metadata auditor. Convert technical file data into a formal summary.
+    const systemMsg = `You are a professional forensic metadata auditor. Convert technical file data into a formal summary for a journalist or investigator.
     
     RESEARCH-BASED RULES:
     1. Analyze Software, CreatorTool, ICC Profile, and Modification Dates.
@@ -273,10 +288,10 @@ async function getRealAiSummary(metadataJson, forensic) {
     4. Examine MakerNotes and Thumbnail integrity.
     5. NEUTRAL TRANSLATION: Use 'The data suggests...', 'This may indicate...'.`;
 
-    const userPrompt = `Audit the following metadata.\n\nMETADATA:\n${metadataJson}\n\nPrompts to address:\n
-    1. Authenticity & Manipulation Check: Cite specific tags (Software, CreatorTool, ICC Profile).
-    2. Where and When Verification: Cross-reference GPS location with timezone.
-    3. Deep Technical Integrity: Explain internal structure (MakerNotes/Thumbnails).`;
+    const userPrompt = `Audit the following metadata.\n\nMETADATA:\n${metadataJson}\n\nPlease provide a detailed forensic report covering:\n
+    1. Authenticity & Manipulation Check: Look specifically at the Software, CreatorTool, ICC Profile, and Modification Dates. Does this image appear to be a raw, untouched photo straight from a camera, or are there digital fingerprints indicating it was saved or altered in an editing program? Cite the specific metadata tags that led to your conclusion.
+    2. Where and When Verification: Review the GPS coordinates, altitude, and timestamps. Explain exactly where and when this photo was taken. Cross-reference the timezone with the GPS location. Are there any discrepancies? If GPS data is missing, explain why this might happen.
+    3. Deep Technical Integrity: Examine the MakerNotes and Thumbnail offset data. Explain if the internal structure of this file remains intact. If MakerNotes are missing or corrupted, explain what this usually means about the file's history. Is there evidence that the embedded thumbnail might differ from the main image?`;
 
     try {
         const response = await openai.chat.completions.create({
@@ -328,7 +343,8 @@ app.post('/api/telemetry', async (req, res) => {
     const { session_id, event_name, file_type, metadata_count, has_gps, ai_summary_generated, tab_engaged, export_type } = req.body;
     try {
         await runQuery(`INSERT INTO telemetry (session_id, event_name, file_type, metadata_count, has_gps, ai_summary_generated, tab_engaged, export_type) 
-                        VALUES ('${session_id || ''}', '${event_name || ''}', '${file_type || ''}', ${metadata_count || 0}, ${has_gps ? 1 : 0}, ${ai_summary_generated ? 1 : 0}, '${tab_engaged || ''}', '${export_type || ''}')`);
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, 
+                        [session_id || '', event_name || '', file_type || '', metadata_count || 0, has_gps ? 1 : 0, ai_summary_generated ? 1 : 0, tab_engaged || '', export_type || '']);
         res.json({ status: 'ok' });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -413,7 +429,7 @@ app.post('/api/clean', upload.single('file'), async (req, res) => {
         const cleanedBuffer = fs.readFileSync(outputPath);
 
         // Store Lead
-        await runQuery(`INSERT INTO leads (email, session_id) VALUES ('${email}', 'clean_feature')`);
+        await runQuery(`INSERT INTO leads (email, session_id) VALUES (?, ?)`, [email, 'clean_feature']);
 
         // Send Email
         if (resend) {

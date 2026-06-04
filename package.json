@@ -4,7 +4,8 @@
   "description": "MetaRead Forensic Metadata Analysis",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "npm install"
   },
   "type": "commonjs",
   "dependencies": {
@@ -18,6 +19,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "resend": "^3.4.1",
+    "sqlite3": "^6.0.1",
     "uuid": "^10.0.0"
   }
 }
