@@ -25,6 +25,7 @@ const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
 
 // Configuration for Email
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const EMAIL_FROM = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 app.use(cors());
@@ -425,6 +426,11 @@ app.post('/api/clean', upload.single('file'), async (req, res) => {
     if (!email) return res.status(400).json({ error: 'Email required for delivery' });
     if (paid !== 'true') return res.status(402).json({ error: 'Payment required ($1)' });
 
+    if (!resend) {
+        console.error('Email delivery failed: RESEND_API_KEY is missing.');
+        return res.status(500).json({ error: 'Email delivery not configured on server.' });
+    }
+
     const outputPath = path.join(os.tmpdir(), `cleaned_${Date.now()}_${req.file.originalname}`);
 
     try {
@@ -435,20 +441,23 @@ app.post('/api/clean', upload.single('file'), async (req, res) => {
         await runQuery(`INSERT INTO leads (email, session_id) VALUES (?, ?)`, [email, 'clean_feature']);
 
         // Send Email
-        if (resend) {
-            await resend.emails.send({
-                from: 'CheckYourPhoto <reports@metaread.ai>',
-                to: email,
-                subject: 'Your Cleaned Photo - Safe to Share',
-                html: `<p>Attached is your photo with all metadata removed. It is now <strong>Safe to Share</strong>.</p>`,
-                attachments: [{ filename: req.file.originalname, content: cleanedBuffer }]
-            });
+        const { data, error } = await resend.emails.send({
+            from: EMAIL_FROM,
+            to: email,
+            subject: 'Your Cleaned Photo - Safe to Share',
+            html: `<p>Attached is your photo with all metadata removed. It is now <strong>Safe to Share</strong>.</p>`,
+            attachments: [{ filename: req.file.originalname, content: cleanedBuffer }]
+        });
+
+        if (error) {
+            console.error('Resend API Error:', error);
+            return res.status(500).json({ error: 'Failed to send email: ' + error.message });
         }
 
         res.json({ status: 'ok', message: 'Cleaned photo sent to ' + email });
     } catch (error) {
         console.error('Clean endpoint error:', error);
-        res.status(500).json({ error: 'Cleaning failed' });
+        res.status(500).json({ error: 'Processing failed: ' + error.message });
     } finally {
         if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
     }

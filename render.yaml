@@ -14,5 +14,7 @@ services:
         sync: false
       - key: RESEND_API_KEY
         sync: false
+      - key: EMAIL_FROM
+        sync: false
       - key: npm_config_build_from_source
         value: "true"
