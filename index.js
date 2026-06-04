@@ -17,6 +17,8 @@ const { Buffer } = require('buffer');
 const app = express();
 const port = process.env.PORT || 3003;
 
+app.set('trust proxy', 1);
+
 // Configuration for AI
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
@@ -57,6 +59,7 @@ const db = new sqlite3.Database(path.join(__dirname, 'database.sqlite'));
 // Initialize tables
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS usage (identifier TEXT, scan_date TEXT, count INTEGER)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_usage ON usage (identifier, scan_date)`);
     db.run(`CREATE TABLE IF NOT EXISTS leads (email TEXT, session_id TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
     db.run(`CREATE TABLE IF NOT EXISTS telemetry (
         session_id TEXT, 
