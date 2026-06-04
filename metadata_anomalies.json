@@ -1,0 +1,98 @@
+{
+  "impossible_combinations": [
+    {
+      "brand": "Apple",
+      "rule": {
+        "Make": "Apple",
+        "Software": { "$not_match": "^\\d+\\.\\d+(\\.\\d+)?$" }
+      },
+      "anomaly": "Software tag does not match standard iOS version format, indicating third-party software save."
+    },
+    {
+      "brand": "Apple",
+      "rule": {
+        "Make": "Apple",
+        "Model": "iPhone 13 Pro",
+        "LensModel": { "$not_in": ["iPhone 13 Pro back dual wide camera 5.7mm f/1.5", "iPhone 13 Pro back telephoto camera 77mm f/2.8", "iPhone 13 Pro back ultrawide camera 1.54mm f/1.8", "iPhone 13 Pro front camera 2.71mm f/2.2"] }
+      },
+      "anomaly": "Lens model does not exist for the specified iPhone model."
+    },
+    {
+      "brand": "Canon",
+      "rule": {
+        "Make": "Canon",
+        "LensModel": { "$match": "^EF" },
+        "Model": { "$match": "^EOS R" }
+      },
+      "context": "EF lens on RF body. Check for LensID/Adapter presence.",
+      "anomaly": "Possible mismatch between Lens mount and Camera body if no adapter is present in EXIF."
+    },
+    {
+      "brand": "Sony",
+      "rule": {
+        "Make": "SONY",
+        "LensModel": { "$match": "^E " },
+        "Model": { "$match": "^ILCE-7" }
+      },
+      "context": "E-mount APS-C lens on a full-frame A7 series body. Possible but requires crop mode.",
+      "anomaly": "Crop mode should be active. If ImageWidth/ImageHeight match full sensor resolution, metadata is likely spoofed."
+    },
+    {
+      "brand": "Samsung",
+      "rule": {
+        "Make": "SAMSUNG",
+        "Software": { "$match": "(?i)photoshop|lightroom|snapseed" }
+      },
+      "anomaly": "Software indicates editing, not a native Samsung camera save."
+    },
+    {
+      "brand": "Any",
+      "rule": {
+        "Make": { "$exists": true },
+        "MakerNote": { "$exists": false }
+      },
+      "anomaly": "Camera make is specified but MakerNotes are entirely missing. Common indicator of third-party re-saving or stripping."
+    }
+  ],
+  "hidden_modification_tags": [
+    "xmpMM:History",
+    "xmpMM:DerivedFrom",
+    "xmpMM:DocumentID",
+    "xmpMM:InstanceID",
+    "xmp:CreatorTool",
+    "xmp:ModifyDate",
+    "crs:HasCrop",
+    "crs:AlreadyApplied",
+    "photoshop:History"
+  ],
+  "social_media_patterns": {
+    "Facebook": {
+      "strips_exif": true,
+      "identifying_tags": {
+        "IPTC:SpecialInstructions": "^FBMD[a-f0-9]+$"
+      },
+      "notes": "Facebook aggressively strips MakerNotes and EXIF but embeds a tracking code in the IPTC metadata block."
+    },
+    "WhatsApp": {
+      "strips_exif": true,
+      "identifying_tags": {
+        "ColorSpace": "sRGB",
+        "ResolutionUnit": "None"
+      },
+      "filename_pattern": "^IMG-\\d{8}-WA\\d+\\.jpg$",
+      "notes": "WhatsApp strips all identifiable metadata. Images are heavily compressed and lack JFIF resolution units."
+    },
+    "Telegram": {
+      "strips_exif": true,
+      "identifying_tags": {},
+      "notes": "Strips all metadata when sent as compressed photo. No known tracking tags injected. Cannot distinguish easily from a standard image stripped by generic tools."
+    },
+    "Instagram": {
+      "strips_exif": true,
+      "identifying_tags": {
+        "Software": "Instagram"
+      },
+      "notes": "Instagram may leave the 'Software' tag as 'Instagram' and strips original EXIF. Image resolution is capped (e.g., 1080x1080 or 1080x1350)."
+    }
+  }
+}

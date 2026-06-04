@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: checkyourphoto
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: PORT
+        value: 3003
+      - key: NODE_VERSION
+        value: 18.0.0
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
