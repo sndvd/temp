@@ -3,7 +3,7 @@ services:
     name: checkyourphoto
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm run build
     startCommand: node index.js
     envVars:
       - key: PORT
