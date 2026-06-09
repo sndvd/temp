@@ -1,0 +1,17 @@
+{
+  "name": "craig-grammar-studio",
+  "version": "1.0.0",
+  "description": "Craig Grammar — Artist based in Porto, Portugal",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": ["art", "portfolio", "gallery", "prints"],
+  "author": "Craig Grammar",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^8.0.16"
+  }
+}

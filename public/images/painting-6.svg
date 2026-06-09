@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#E8E4DE"/>
+  <rect x="60" y="40" width="680" height="520" rx="2" fill="#F8F6F3"/>
+  <rect x="300" y="80" width="200" height="300" fill="rgba(44,44,44,0.07)"/>
+  <rect x="320" y="100" width="160" height="260" fill="rgba(139,115,85,0.1)"/>
+  <circle cx="400" cy="160" r="40" fill="rgba(166,138,92,0.15)"/>
+  <rect x="260" y="380" width="280" height="2" fill="rgba(44,44,44,0.08)"/>
+  <rect x="200" y="400" width="400" height="1" fill="rgba(44,44,44,0.04)"/>
+  <text x="400" y="560" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#8B7355">Sé do Porto — placeholder</text>
+</svg>

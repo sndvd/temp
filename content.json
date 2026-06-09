@@ -1,0 +1,162 @@
+{
+  "site": {
+    "title": "Craig Grammer",
+    "tagline": "Artist based in Porto, Portugal",
+    "description": "Contemporary painter — original fine art prints available from Porto, Portugal",
+    "url": "https://craiggrammer.art",
+    "email": "craiggrammar.art@gmail.com",
+    "social": {
+      "instagram": "https://instagram.com/craiggrammer",
+      "facebook": "https://facebook.com/craiggrammer",
+      "pinterest": "https://pinterest.com/craiggrammer"
+    }
+  },
+  "design": {
+    "colors": {
+      "background": "#F8F6F3",
+      "text": "#2C2C2C",
+      "accent": "#8B7355",
+      "hover": "#A68A5C",
+      "light": "#E8E4DE",
+      "white": "#FFFFFF"
+    },
+    "typography": {
+      "headings": "'Playfair Display', 'Cormorant Garamond', Georgia, serif",
+      "body": "'Inter', 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    }
+  },
+  "home": {
+    "hero_title": "Craig Grammer",
+    "hero_subtitle": "Artist based in Porto, Portugal",
+    "bio": "Craig Grammer is a painter living and working in Porto, Portugal. What began as a lifelong love of painting became a new chapter in retirement — a promise kept to his wife Shoshana. With the encouragement of his teacher Cynthia and photographer Mark, a passion quietly became a new career: selling fine art prints of his original paintings to collectors around the world.",
+    "featured_ids": ["painting-1", "painting-2", "painting-3"]
+  },
+  "about": {
+    "bio_paragraphs": [
+      "Craig Grammer is a painter based in Porto, Portugal. After a lifetime of appreciating art, he decided in retirement to take his love of painting to the next level — a promise he made to his wife, Shoshana. What followed was a journey of discovery under the guidance of his teacher and studio head, Cynthia, with support from his photographer and print maker, Mark.",
+      "Working primarily in oils and acrylics, Craig's paintings explore light, memory, and the urban landscape. The historic streets of Porto, the play of Atlantic light on tiled facades, the quiet corners of a city layered with centuries of history — these are the subjects that draw his brush. Each piece is built through layered glazes and careful observation, creating paintings that invite quiet contemplation.",
+      "With the encouragement of friends and family, what began as a personal promise has grown into something unexpected: a new career selling fine art prints of his original works. His prints are now collected internationally, shipped from his studio in Porto to art lovers around the world."
+    ],
+    "statement": "This started as a promise. A promise to my wife Shoshana that I would finally take my love of painting seriously — not as a hobby, but as something real. With Cynthia's teaching, Mark's craft, and the support of everyone who believed in me, I've found a new voice. Every painting is a conversation between what I see and what I remember. Every print I send out carries a piece of Porto with it.",
+    "photo": "/images/studio-placeholder.svg"
+  },
+  "contact": {
+    "form_intro": "I'd love to hear from you. Whether you're interested in a painting, a commission, or just want to say hello — please get in touch.",
+    "email": "craiggrammar.art@gmail.com",
+    "location": "Porto, Portugal",
+    "studio_hours": "By appointment only"
+  },
+  "navigation": [
+    { "label": "Home", "href": "/" },
+    { "label": "Gallery", "href": "/gallery" },
+    { "label": "Prints", "href": "/store" },
+    { "label": "About", "href": "/about" },
+    { "label": "Contact", "href": "/contact" }
+  ],
+  "paintings": [
+    {
+      "id": "painting-1",
+      "title": "Morning Light, Ribeira",
+      "medium": "Oil on canvas",
+      "dimensions": "80 × 100 cm",
+      "year": 2024,
+      "description": "A study of early morning light on the historic Ribeira district, with its narrow alleys and tiled facades bathed in golden warmth.",
+      "image": "/images/painting-1.jpg",
+      "collection": "Urban Light",
+      "prints": {
+        "A4": 25,
+        "A3": 45,
+        "A2": 75
+      }
+    },
+    {
+      "id": "painting-2",
+      "title": "Douro Dreaming",
+      "medium": "Acrylic on linen",
+      "dimensions": "60 × 80 cm",
+      "year": 2023,
+      "description": "The Douro River at dusk, with mist rising from the water and the lights of Vila Nova de Gaia beginning to shimmer on the far bank.",
+      "image": "/images/painting-2.jpg",
+      "collection": "Urban Light",
+      "prints": {
+        "A4": 25,
+        "A3": 45,
+        "A2": 75
+      }
+    },
+    {
+      "id": "painting-3",
+      "title": "Azulejo No. 7",
+      "medium": "Mixed media",
+      "dimensions": "100 × 120 cm",
+      "year": 2024,
+      "description": "An abstracted exploration of Porto's iconic blue tiles, breaking the traditional patterns into fragments of colour and memory.",
+      "image": "/images/painting-3.jpg",
+      "collection": "Patterns & Memory",
+      "prints": {
+        "A4": 25,
+        "A3": 45,
+        "A2": 75
+      }
+    },
+    {
+      "id": "painting-4",
+      "title": "Fado Afternoon",
+      "medium": "Oil on canvas",
+      "dimensions": "70 × 90 cm",
+      "year": 2023,
+      "description": "The melancholic atmosphere of a late afternoon in a traditional fado house — shadows lengthening, a single voice echoing off stone walls.",
+      "image": "/images/painting-4.jpg",
+      "collection": "Patterns & Memory",
+      "prints": {
+        "A4": 25,
+        "A3": 45,
+        "A2": 75
+      }
+    },
+    {
+      "id": "painting-5",
+      "title": "Jardins do Palácio",
+      "medium": "Acrylic on paper",
+      "dimensions": "50 × 65 cm",
+      "year": 2024,
+      "description": "The formal gardens of the Palácio de Cristal, with the Douro glimpsed through cypress trees and camellia blooms catching the afternoon light.",
+      "image": "/images/painting-5.jpg",
+      "collection": "Urban Light",
+      "prints": {
+        "A4": 25,
+        "A3": 45,
+        "A2": 75
+      }
+    },
+    {
+      "id": "painting-6",
+      "title": "Sé do Porto",
+      "medium": "Oil on linen",
+      "dimensions": "90 × 110 cm",
+      "year": 2024,
+      "description": "The cathedral at dawn — a monumental study of light and shadow on ancient granite, with the city stirring below.",
+      "image": "/images/painting-6.jpg",
+      "collection": "Sacred Spaces",
+      "prints": {
+        "A4": 25,
+        "A3": 45,
+        "A2": 75
+      }
+    }
+  ],
+  "collections": ["All", "Urban Light", "Patterns & Memory", "Sacred Spaces"],
+  "store": {
+    "shipping_note": "Ships from Porto, Portugal",
+    "currency": "€",
+    "sizes": [
+      { "id": "A4", "label": "A4 (21 × 29.7 cm)" },
+      { "id": "A3", "label": "A3 (29.7 × 42 cm)" },
+      { "id": "A2", "label": "A2 (42 × 59.4 cm)" }
+    ]
+  },
+  "footer": {
+    "copyright": "© 2024 Craig Grammer. All rights reserved.",
+    "tagline": "Artist based in Porto, Portugal"
+  }
+}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Craig Grammar Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/admin.css" />
+</head>
+<body>
+  <header class="admin-header">
+    <div class="container">
+      <h1>Studio Admin</h1>
+      <div class="admin-actions">
+        <a href="/" class="btn btn-outline" target="_blank">View Site</a>
+        <button class="btn btn-primary" id="saveAllBtn">Save Changes</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-body">
+    <nav class="admin-tabs" id="adminTabs">
+      <button class="active" data-tab="content">Content</button>
+      <button data-tab="paintings">Paintings</button>
+      <button data-tab="store">Store</button>
+      <button data-tab="design">Design</button>
+    </nav>
+
+    <!-- Tab: Content -->
+    <section class="admin-tab-content active" id="tab-content">
+      <div class="admin-card">
+        <h2>Site Information</h2>
+        <div class="form-group">
+          <label>Site Title</label>
+          <input type="text" id="edit-site-title" data-path="site.title" />
+        </div>
+        <div class="form-group">
+          <label>Tagline</label>
+          <input type="text" id="edit-site-tagline" data-path="site.tagline" />
+        </div>
+        <div class="form-group">
+          <label>Description (SEO)</label>
+          <input type="text" id="edit-site-description" data-path="site.description" />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="edit-site-email" data-path="site.email" />
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h2>Home Page</h2>
+        <div class="form-group">
+          <label>Hero Title</label>
+          <input type="text" id="edit-home-title" data-path="home.hero_title" />
+        </div>
+        <div class="form-group">
+          <label>Hero Subtitle</label>
+          <input type="text" id="edit-home-subtitle" data-path="home.hero_subtitle" />
+        </div>
+        <div class="form-group">
+          <label>Artist Bio</label>
+          <textarea id="edit-home-bio" data-path="home.bio" rows="4"></textarea>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h2>About Page</h2>
+        <div class="form-group">
+          <label>Bio Paragraph 1</label>
+          <textarea id="edit-about-p1" data-path="about.bio_paragraphs.0" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Bio Paragraph 2</label>
+          <textarea id="edit-about-p2" data-path="about.bio_paragraphs.1" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Bio Paragraph 3</label>
+          <textarea id="edit-about-p3" data-path="about.bio_paragraphs.2" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Artistic Statement</label>
+          <textarea id="edit-about-statement" data-path="about.statement" rows="4"></textarea>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h2>Contact Page</h2>
+        <div class="form-group">
+          <label>Form Intro Text</label>
+          <textarea id="edit-contact-intro" data-path="contact.form_intro" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Display Email</label>
+          <input type="email" id="edit-contact-email" data-path="contact.email" />
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <input type="text" id="edit-contact-location" data-path="contact.location" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab: Paintings -->
+    <section class="admin-tab-content" id="tab-paintings">
+      <div id="paintings-editor"></div>
+      <div class="admin-card">
+        <p class="help-text">Upload new images to <code>public/images/</code> with filenames matching <code>painting-1.jpg</code> through <code>painting-6.jpg</code>, or update the filenames in the fields below.</p>
+      </div>
+    </section>
+
+    <!-- Tab: Store -->
+    <section class="admin-tab-content" id="tab-store">
+      <div class="admin-card">
+        <h2>Print Store Settings</h2>
+        <div class="form-group">
+          <label>Shipping Note</label>
+          <input type="text" id="edit-store-shipping" data-path="store.shipping_note" />
+        </div>
+        <div class="form-group">
+          <label>Currency Symbol</label>
+          <input type="text" id="edit-store-currency" data-path="store.currency" maxlength="2" />
+        </div>
+      </div>
+      <div class="admin-card">
+        <h2>Size Options</h2>
+        <div class="size-editor" id="sizeEditor"></div>
+      </div>
+      <div class="admin-card">
+        <h2>Update Print Prices</h2>
+        <p class="help-text">Edit prices per painting in the Paintings tab above.</p>
+      </div>
+    </section>
+
+    <!-- Tab: Design -->
+    <section class="admin-tab-content" id="tab-design">
+      <div class="admin-card">
+        <h2>Colors</h2>
+        <div class="color-grid" id="colorGrid"></div>
+      </div>
+      <div class="admin-card">
+        <h2>Typography</h2>
+        <div class="form-group">
+          <label>Heading Font</label>
+          <input type="text" id="edit-font-headings" data-path="design.typography.headings" placeholder="'Playfair Display', serif" />
+        </div>
+        <div class="form-group">
+          <label>Body Font</label>
+          <input type="text" id="edit-font-body" data-path="design.typography.body" placeholder="'Inter', sans-serif" />
+        </div>
+      </div>
+    </section>
+
+    <div class="admin-save-bar">
+      <button class="btn btn-primary" id="saveAllBtnBottom">Save All Changes</button>
+      <span id="saveStatus"></span>
+    </div>
+  </main>
+
+  <script type="module" src="/src/admin.js"></script>
+</body>
+</html>

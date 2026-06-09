@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#E8E4DE"/>
+  <rect x="80" y="40" width="640" height="520" rx="2" fill="#F8F6F3"/>
+  <ellipse cx="300" cy="350" rx="180" ry="120" fill="rgba(139,115,85,0.08)"/>
+  <circle cx="200" cy="200" r="30" fill="rgba(166,138,92,0.15)"/>
+  <circle cx="500" cy="180" r="20" fill="rgba(166,138,92,0.1)"/>
+  <circle cx="350" cy="150" r="15" fill="rgba(139,115,85,0.12)"/>
+  <circle cx="600" cy="280" r="25" fill="rgba(44,44,44,0.05)"/>
+  <text x="400" y="560" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#8B7355">Jardins do Palácio — placeholder</text>
+</svg>
