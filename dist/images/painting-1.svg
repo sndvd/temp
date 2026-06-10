@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#E8E4DE"/>
+  <rect x="100" y="80" width="600" height="440" rx="2" fill="#D4CFC6"/>
+  <rect x="120" y="100" width="560" height="400" rx="1" fill="#F8F6F3"/>
+  <ellipse cx="400" cy="300" rx="150" ry="120" fill="rgba(139,115,85,0.15)"/>
+  <ellipse cx="450" cy="280" rx="80" ry="60" fill="rgba(166,138,92,0.12)"/>
+  <line x1="200" y1="350" x2="600" y2="350" stroke="rgba(44,44,44,0.08)" stroke-width="2"/>
+  <line x1="250" y1="380" x2="550" y2="380" stroke="rgba(44,44,44,0.05)" stroke-width="1"/>
+  <text x="400" y="560" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#8B7355">Morning Light, Ribeira — placeholder</text>
+</svg>

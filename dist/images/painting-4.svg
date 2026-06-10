@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#E8E4DE"/>
+  <rect x="100" y="60" width="600" height="480" rx="2" fill="#2C2C2C"/>
+  <ellipse cx="350" cy="250" rx="100" ry="80" fill="rgba(139,115,85,0.2)"/>
+  <ellipse cx="450" cy="350" rx="60" ry="40" fill="rgba(248,246,243,0.08)"/>
+  <rect x="150" y="380" width="500" height="2" fill="rgba(248,246,243,0.1)"/>
+  <rect x="200" y="400" width="400" height="1" fill="rgba(248,246,243,0.05)"/>
+  <text x="400" y="560" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#8B7355">Fado Afternoon — placeholder</text>
+</svg>
