@@ -35,16 +35,16 @@ function applyDesignVariables(design) {
   root.setProperty('--body-font', design.typography.body);
 }
 
-// --- Router ---
+// --- Router (hash-based for static hosting) ---
 function navigate(path) {
   path = path || '/';
   currentRoute = path;
-  history.pushState(null, '', path);
+  window.location.hash = '#' + path;
   renderPage(path);
 }
 
 function getRoute() {
-  return window.location.pathname || '/';
+  return window.location.hash.slice(1) || '/';
 }
 
 // --- Edit Mode ---
