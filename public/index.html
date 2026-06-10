@@ -15,6 +15,13 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
+        @font-face {
+            font-family: 'Unitblock';
+            src: url('/fonts/Unitblock.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         :root {
             --bg-color: #101314;
             --card-bg: #1a1d1e;
@@ -37,7 +44,7 @@
         }
 
         h1, h2, h3, h4, h5, .brand-font {
-            font-family: 'Limelight', cursive;
+            font-family: 'Unitblock', sans-serif;
             font-weight: 400;
         }
 
@@ -49,9 +56,9 @@
         }
 
         .brand-logo {
-            font-family: 'Limelight', cursive;
+            font-family: 'Unitblock', sans-serif;
             font-weight: 400;
-            color: var(--primary-blue);
+            color: var(--accent-green);
             font-size: 1.5rem;
             display: flex;
             align-items: center;
@@ -362,6 +369,13 @@
                         <p class="small" style="color: var(--text-muted);">By uploading a file, you agree to our <a href="/terms.html" target="_blank" style="color: var(--text-muted);">Terms of Use</a>.</p>
                         <button class="btn btn-primary mt-3">Scan Photo Now (Free)</button>
                         <input type="file" id="fileInput" class="d-none" accept="image/*,application/pdf">
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <div class="d-inline-flex align-items-center px-3 py-2 rounded-pill" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
+                        <i class="bi bi-shield-lock-fill text-success me-2"></i>
+                        <span class="small fw-bold text-success">Zero-Storage Privacy Guarantee: We do not store your files or metadata.</span>
                     </div>
                 </div>
                 

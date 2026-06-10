@@ -330,10 +330,11 @@ async function sanitizeFile(inputBuffer, outputPath) {
             }
             try {
                 fs.copyFileSync(tempPath, outputPath);
-                if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
                 resolve();
             } catch (e) {
                 reject(e);
+            } finally {
+                if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
             }
         });
     });
@@ -368,15 +369,13 @@ app.post('/api/extract', upload.single('file'), async (req, res) => {
         });
     }
 
-    const tempFilePath = path.join(os.tmpdir(), `upload-${Date.now()}-${req.file.originalname}`);
-
     try {
         const md5 = crypto.createHash('md5').update(req.file.buffer).digest('hex');
         const sha256 = crypto.createHash('sha256').update(req.file.buffer).digest('hex');
         const reportId = `MRT-${Math.floor(1000 + Math.random() * 9000)}-${uuidv4().split('-')[0].toUpperCase()}`;
-        fs.writeFileSync(tempFilePath, req.file.buffer);
         
-        const metadata = await exiftool.read(tempFilePath, ["-n"]);
+        // Use buffer directly with exiftool to avoid writing to disk
+        const metadata = await exiftool.read(req.file.buffer, ["-n"]);
         const forensic = analyzeForensicSignature(metadata);
         const anomalies = detectAnomalies(metadata);
         const timeline = extractTimeline(metadata);
@@ -415,8 +414,6 @@ app.post('/api/extract', upload.single('file'), async (req, res) => {
     } catch (error) {
         console.error('Error extracting metadata:', error);
         res.status(400).json({ error: 'Extraction failed.' });
-    } finally {
-        if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
     }
 });
 
@@ -437,8 +434,8 @@ app.post('/api/clean', upload.single('file'), async (req, res) => {
         await sanitizeFile(req.file.buffer, outputPath);
         const cleanedBuffer = fs.readFileSync(outputPath);
 
-        // Store Lead
-        await runQuery(`INSERT INTO leads (email, session_id) VALUES (?, ?)`, [email, 'clean_feature']);
+        // Store Lead - Disabled for Zero-Storage Privacy Policy
+        // await runQuery(`INSERT INTO leads (email, session_id) VALUES (?, ?)`, [email, 'clean_feature']);
 
         // Send Email
         const { data, error } = await resend.emails.send({
@@ -471,8 +468,13 @@ app.post('/api/sanitize', upload.single('file'), async (req, res) => {
     const outputPath = path.join(os.tmpdir(), `legacy_clean_${Date.now()}`);
     try {
         await sanitizeFile(req.file.buffer, outputPath);
-        res.sendFile(outputPath);
-    } catch (e) { res.status(500).send('Error'); }
+        res.sendFile(outputPath, (err) => {
+            if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+        });
+    } catch (e) { 
+        if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+        res.status(500).send('Error'); 
+    }
 });
 
 app.post('/api/generate-pdf', async (req, res) => {
