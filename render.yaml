@@ -7,7 +7,7 @@ services:
     startCommand: node index.js
     envVars:
       - key: PORT
-        value: 3003
+        value: 3000
       - key: NODE_VERSION
         value: 18.0.0
       - key: OPENAI_API_KEY

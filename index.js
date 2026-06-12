@@ -15,7 +15,7 @@ const { detectAnomalies } = require('./anomalyDetection');
 const { Buffer } = require('buffer');
 
 const app = express();
-const port = process.env.PORT || 3003;
+const port = process.env.PORT || 3000;
 
 app.set('trust proxy', 1);
 
